@@ -1,10 +1,10 @@
-project "OpenGL Renderer"
+project "OpenGL Rendering"
     kind "SharedLib"
     language "C++"
     cppdialect "C++20"
     staticruntime "Off"
 
-    RegisterDynamicPlugin("OpenGL Renderer")
+    RegisterDynamicPlugin("OpenGL Rendering")
 
     files
     {

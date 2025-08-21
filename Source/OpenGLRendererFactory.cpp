@@ -1,4 +1,4 @@
-#include "OpenGLRendererPlugin.h"
+#include "OpenGLRendererFactory.h"
 #include "OpenGLRenderer.h"
 
 namespace OpenGLRendering

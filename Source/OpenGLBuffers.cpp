@@ -1,12 +1,9 @@
 #include "OpenGLBuffers.h"
-#include "OpenGLShader.h"
-
+#include "OpenGLMaterial.h"
 
 namespace OpenGLRendering
 {
-    /////////////////////////////////////////////////////////////////////////////
     /// Vertex Buffer ///////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
 
     OpenGLVertexBuffer::OpenGLVertexBuffer()
     {
@@ -19,11 +16,10 @@ namespace OpenGLRendering
         glDeleteBuffers(1, &_rendererId);
     }
 
-    void OpenGLVertexBuffer::SetData(const Tbx::VertexBuffer& vertices)
+    void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
     {
         const auto& verticesVec = vertices.GetVertices();
         _count = (Tbx::uint32)verticesVec.size();
-        glBindBuffer(GL_ARRAY_BUFFER, _rendererId);
         glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), vertices.GetVertices().data(), GL_STATIC_DRAW);
 
         Tbx::uint32 index = 0;
@@ -31,7 +27,7 @@ namespace OpenGLRendering
         for (const auto& element : layout)
         {
             const auto& count = element.GetCount();
-            const auto& type = ShaderDataTypeToOpenGLType(element.GetType());
+            const auto& type = ShaderUniformTypeToOpenGLType(element.GetType());
             const auto& stride = layout.GetStride();
             const auto& offset = element.GetOffset();
             const auto& normalized = element.IsNormalized() ? GL_TRUE : GL_FALSE;
@@ -45,10 +41,7 @@ namespace OpenGLRendering
     void OpenGLVertexBuffer::AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const
     {
         glEnableVertexAttribArray(index);
-#pragma warning( push )
-#pragma warning( disable : 4312 )
         glVertexAttribPointer(index, size, type, normalized, stride, (const void*)offset);
-#pragma warning( pop )
     }
 
     void OpenGLVertexBuffer::Bind() const
@@ -61,9 +54,7 @@ namespace OpenGLRendering
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    /////////////////////////////////////////////////////////////////////////////
     /// Index Buffer ////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
 
     OpenGLIndexBuffer::OpenGLIndexBuffer()
     {
@@ -71,11 +62,10 @@ namespace OpenGLRendering
         glCreateBuffers(1, &_rendererId);
     }
 
-    void OpenGLIndexBuffer::SetData(const Tbx::IndexBuffer& indices)
+    void OpenGLIndexBuffer::Upload(const std::vector<Tbx::uint32>& indices)
     {
-        const auto& indicesVec = indices.GetIndices();
-        _count = (Tbx::uint32)indicesVec.size();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), indicesVec.data(), GL_STATIC_DRAW);
+        _count = (Tbx::uint32)indices.size();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), indices.data(), GL_STATIC_DRAW);
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -93,42 +83,43 @@ namespace OpenGLRendering
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    /////////////////////////////////////////////////////////////////////////////
     /// Vertex Array ////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
 
-    OpenGLVertexArray::OpenGLVertexArray()
+    OpenGLMesh::OpenGLMesh()
     {
         glGenVertexArrays(1, &_rendererId);
     }
 
-    OpenGLVertexArray::~OpenGLVertexArray()
+    OpenGLMesh::~OpenGLMesh()
     {
         glDeleteVertexArrays(1, &_rendererId);
     }
 
-    void OpenGLVertexArray::AddVertexBuffer(const Tbx::VertexBuffer& buffer)
+    void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
     {
         TBX_ASSERT(buffer.GetLayout().GetElements().size(), "Vertex buffer has no layout... a layout MUST be provided!");
 
-        auto& glBuffer = _vertexBuffers.emplace_back();
-        glBuffer.Bind();
-        glBuffer.SetData(buffer);
+        _vertexBuffer = {};
+        _vertexBuffer.Upload(buffer);
     }
 
-    void OpenGLVertexArray::SetIndexBuffer(const Tbx::IndexBuffer& buffer)
+    void OpenGLMesh::UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer)
+    {
+        _indexBuffer = {};
+        _indexBuffer.Upload(buffer);
+    }
+
+    void OpenGLMesh::Bind() const
     {
         _indexBuffer.Bind();
-        _indexBuffer.SetData(buffer);
-    }
-
-    void OpenGLVertexArray::Bind() const
-    {
+        _vertexBuffer.Bind();
         glBindVertexArray(_rendererId);
     }
 
-    void OpenGLVertexArray::Unbind() const
+    void OpenGLMesh::Unbind() const
     {
+        _indexBuffer.Unbind();
+        _vertexBuffer.Unbind();
         glBindVertexArray(0);
     }
 }

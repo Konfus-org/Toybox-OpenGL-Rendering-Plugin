@@ -1,6 +1,6 @@
 #pragma once
-#include <TbxCore.h>
-#include <GLFW/glfw3.h>
+#include <Tbx/Graphics/IRenderSurface.h>
+#include <memory>
 
 namespace OpenGLRendering
 {
@@ -10,14 +10,16 @@ namespace OpenGLRendering
         OpenGLContext() = default;
         ~OpenGLContext() = default;
 
-        void Set(const std::weak_ptr<Tbx::IWindow>& windowToRenderInto);
-
+        void Set(const std::weak_ptr<Tbx::IRenderSurface>& surface);
         void SwapBuffers();
-        void SetSwapInterval(const int& interval) const;
-        GLFWwindow* GetRenderSurface();
+
+        int GetSwapInterval() const;
+        void SetSwapInterval(int interval) const;
+
+        std::weak_ptr<Tbx::IRenderSurface> GetRenderSurface();
 
     private:
-        GLFWwindow* _windowToRenderTo = nullptr;
+        std::weak_ptr<Tbx::IRenderSurface> _renderSurface = {};
     };
 }
 

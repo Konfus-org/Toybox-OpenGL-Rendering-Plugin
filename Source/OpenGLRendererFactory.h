@@ -1,5 +1,5 @@
 #pragma once
-#include <TbxCore.h>
+#include <Tbx/PluginAPI/RegisterPlugin.h>
 
 namespace OpenGLRendering
 {

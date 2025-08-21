@@ -1,46 +1,74 @@
 #include "OpenGLContext.h"
+#include <Tbx/Debug/Debugging.h>
 #include <glad/glad.h>
 
 namespace OpenGLRendering
 {
-    void OpenGLContext::Set(const std::weak_ptr<Tbx::IWindow>& windowToRenderInto)
+    void GLAPIENTRY GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
     {
-        // Initialize opengl
-        auto* window = std::any_cast<GLFWwindow*>(windowToRenderInto.lock()->GetNativeWindow());
-        TBX_ASSERT(window, "OpenGL graphics context cannot be initialized, native window is invalid!");
-        _windowToRenderTo = window;
+        switch (severity)
+        {
+            case GL_DEBUG_SEVERITY_HIGH:
+                TBX_ASSERT(false, "GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                TBX_TRACE_ERROR("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_LOW:
+                TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_NOTIFICATION:
+                TBX_TRACE_INFO("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            default:
+                TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", severity, message);
+                break;
+        }
+    }
 
-        glfwMakeContextCurrent(_windowToRenderTo);
-        int gladStatus = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    void OpenGLContext::Set(const std::weak_ptr<Tbx::IRenderSurface>& surface)
+    {
+        _renderSurface = surface;
+
+        int gladStatus = gladLoadGLLoader((GLADloadproc)_renderSurface.lock()->GetProcAddress());
         TBX_ASSERT(gladStatus, "Failed to initialize Glad!");
 
-        TBX_INFO("\n");
-        TBX_INFO("OpenGL Info:");
+        TBX_TRACE_INFO("OpenGL Info:");
         const std::string& vendorVersion = (const char*)glGetString(GL_VENDOR);
-        TBX_INFO("  Vendor: {0}", vendorVersion);
+        TBX_TRACE_INFO("  Vendor: {0}", vendorVersion);
         const std::string& rendererVersion = (const char*)glGetString(GL_RENDERER);
-        TBX_INFO("  Renderer: {0}", rendererVersion);
+        TBX_TRACE_INFO("  Renderer: {0}", rendererVersion);
         const std::string& glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-        TBX_INFO("  GLSL: {0}", glslVersion);
+        TBX_TRACE_INFO("  GLSL: {0}", glslVersion);
         const std::string& openGLVersion = (const char*)glGetString(GL_VERSION);
-        TBX_INFO("  Version: {0}", openGLVersion);
-        TBX_INFO("\n");
+        TBX_TRACE_INFO("  Version: {0}", openGLVersion);
 
         TBX_ASSERT(GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 5), "Tbx requires at least OpenGL version 4.5!");
+
+#ifdef TBX_DEBUG
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(GlMessageCallback, 0);
+#endif
     }
 
     void OpenGLContext::SwapBuffers()
     {
-        glfwSwapBuffers(_windowToRenderTo);
+        _renderSurface.lock()->SwapBuffers();
     }
 
-    void OpenGLContext::SetSwapInterval(const int& interval) const
+    int OpenGLContext::GetSwapInterval() const
     {
-        glfwSwapInterval(interval);
+        return _renderSurface.lock()->GetSwapInterval();
     }
 
-    GLFWwindow* OpenGLContext::GetRenderSurface()
+    void OpenGLContext::SetSwapInterval(int interval) const
     {
-        return _windowToRenderTo;
+        _renderSurface.lock()->SetSwapInterval(interval);
+    }
+
+    std::weak_ptr<Tbx::IRenderSurface> OpenGLContext::GetRenderSurface()
+    {
+        return _renderSurface;
     }
 }

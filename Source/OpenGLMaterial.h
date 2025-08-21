@@ -1,30 +1,42 @@
 #pragma once
 #include "IBindable.h"
-#include <TbxCore.h>
+#include "OpenGLTexture.h"
+#include <Tbx/Graphics/Material.h>
+#include <Tbx/Debug/Debugging.h>
 #include <glad/glad.h>
 
 namespace OpenGLRendering
 {
-    class OpenGLShader : public IBindable
+    class OpenGLShader
     {
     public:
-        ~OpenGLShader() final;
-
-        void Compile(const Tbx::Shader& shader);
-        void Bind() const final;
-        void Unbind() const final;
-        void UploadData(const Tbx::ShaderData& data) const;
-
-        Tbx::UID GetAssociatedAssetId() const { return _associatedAssetId; }
+        void Compile(const Tbx::Shader& shader, Tbx::uint rendererId);
+        void UploadUniform(const Tbx::ShaderUniform& data) const;
 
     private:
-        Tbx::UID _associatedAssetId = -1;
         Tbx::uint _rendererId = -1;
     };
 
-    static GLenum ShaderDataTypeToOpenGLType(const Tbx::ShaderDataType& type)
+    class OpenGLMaterial : public IBindable
     {
-        using enum Tbx::ShaderDataType;
+    public:
+        OpenGLMaterial() = default;
+        ~OpenGLMaterial() final;
+
+        void Upload(const Tbx::Material& material);
+        void Bind() const final;
+        void Unbind() const final;
+        void UploadUniform(const Tbx::ShaderUniform& data) const;
+
+    private:
+        Tbx::uint _rendererId = -1;
+        std::vector<OpenGLShader> _shaders = {};
+        std::vector<OpenGLTexture> _textures = {};
+    };
+
+    static GLenum ShaderUniformTypeToOpenGLType(const Tbx::ShaderUniformDataType& type)
+    {
+        using enum Tbx::ShaderUniformDataType;
         switch (type)
         {
             case None:     return GL_NONE;

@@ -1,5 +1,7 @@
 {
-    "name": "OpenGL Renderer",
+    "name": "OpenGL Rendering",
+    "lib": "OpenGL Rendering.dll",
+    "priority": "0",
     "language": "C++",
     "version": "0.0.1",
     "author": "Konfus-dev",

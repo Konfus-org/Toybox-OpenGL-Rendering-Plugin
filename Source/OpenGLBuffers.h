@@ -1,8 +1,8 @@
 #pragma once
 #include "IBindable.h"
-#include <TbxCore.h>
+#include <Tbx/Graphics/Buffers.h>
+#include <Tbx/TypeAliases/Int.h>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 namespace OpenGLRendering
 {
@@ -12,7 +12,7 @@ namespace OpenGLRendering
         OpenGLVertexBuffer();
         ~OpenGLVertexBuffer() final;
 
-        void SetData(const Tbx::VertexBuffer& vertices);
+        void Upload(const Tbx::VertexBuffer& vertices);
         void AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const;
 
         void Bind() const final;
@@ -31,7 +31,7 @@ namespace OpenGLRendering
         OpenGLIndexBuffer();
         ~OpenGLIndexBuffer() final;
 
-        void SetData(const Tbx::IndexBuffer& indices);
+        void Upload(const std::vector<Tbx::uint32>& indices);
         void Bind() const final;
         void Unbind() const final;
 
@@ -42,26 +42,23 @@ namespace OpenGLRendering
         Tbx::uint32 _count = 0;
     };
 
-    class OpenGLVertexArray : public IBindable
+    class OpenGLMesh : public IBindable
     {
     public:
-        OpenGLVertexArray();
-        ~OpenGLVertexArray() final;
+        OpenGLMesh();
+        ~OpenGLMesh() final;
 
         void Bind() const final;
         void Unbind() const final;
 
-        void AddVertexBuffer(const Tbx::VertexBuffer& buffer);
-        void SetIndexBuffer(const Tbx::IndexBuffer& buffer);
+        void UploadVertexBuffer(const Tbx::VertexBuffer& buffer);
+        void UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer);
 
-        const std::vector<OpenGLVertexBuffer>& GetVertexBuffers() const { return _vertexBuffers; }
+        const OpenGLVertexBuffer& GetVertexBuffer() const { return _vertexBuffer; }
         const OpenGLIndexBuffer& GetIndexBuffer() const { return _indexBuffer; }
-        Tbx::uint32 GetIndexCount() const { return _indexBuffer.GetCount(); }
-
-        void Clear() { _vertexBuffers.clear(); }
 
     private:
-        std::vector<OpenGLVertexBuffer> _vertexBuffers;
+        OpenGLVertexBuffer _vertexBuffer;
         OpenGLIndexBuffer _indexBuffer;
         Tbx::uint32 _rendererId = -1;
     };

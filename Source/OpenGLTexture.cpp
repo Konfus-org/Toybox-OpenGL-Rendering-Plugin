@@ -12,9 +12,8 @@ namespace OpenGLRendering
         glDeleteTextures(1, &_rendererId);
     }
 
-    void OpenGLTexture::SetData(const Tbx::Texture& tex, const Tbx::uint& slot)
+    void OpenGLTexture::Upload(const Tbx::Texture& tex, const Tbx::uint& slot)
     {
-        _associatedAssetId = tex.GetId();
         _slot = slot;
 
         // Setup texture parameters
@@ -39,7 +38,7 @@ namespace OpenGLRendering
 
         // Upload texture data to GPU
         glTextureStorage2D(_rendererId, 1, GL_RGB8, tex.GetWidth(), tex.GetHeight());
-        glTextureSubImage2D(_rendererId, 0, 0, 0, tex.GetWidth(), tex.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, tex.GetData().get());
+        glTextureSubImage2D(_rendererId, 0, 0, 0, tex.GetWidth(), tex.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, tex.GetPixels().data());
     }
 
     void OpenGLTexture::Bind() const
