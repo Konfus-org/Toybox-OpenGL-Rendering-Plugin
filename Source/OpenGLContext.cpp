@@ -48,6 +48,13 @@ namespace OpenGLRendering
 #ifdef TBX_DEBUG
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageControl(
+            GL_DONT_CARE,
+            GL_DONT_CARE,
+            GL_DEBUG_SEVERITY_NOTIFICATION,
+            0,
+            nullptr,
+            GL_FALSE);
         glDebugMessageCallback(GlMessageCallback, 0);
 #endif
     }

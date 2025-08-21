@@ -36,6 +36,7 @@ namespace OpenGLRendering
         glTextureParameteri(_rendererId, GL_TEXTURE_WRAP_S, wrapping);
         glTextureParameteri(_rendererId, GL_TEXTURE_WRAP_T, wrapping);
 
+        // TODO: support other formats such as RGBA
         // Upload texture data to GPU
         glTextureStorage2D(_rendererId, 1, GL_RGB8, tex.GetWidth(), tex.GetHeight());
         glTextureSubImage2D(_rendererId, 0, 0, 0, tex.GetWidth(), tex.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, tex.GetPixels().data());

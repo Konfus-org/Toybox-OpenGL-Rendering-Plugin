@@ -7,19 +7,17 @@ namespace OpenGLRendering
 
     OpenGLVertexBuffer::OpenGLVertexBuffer()
     {
-        _count = 0;
         glCreateBuffers(1, &_rendererId);
     }
 
     OpenGLVertexBuffer::~OpenGLVertexBuffer()
     {
+        Unbind();
         glDeleteBuffers(1, &_rendererId);
     }
 
     void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
     {
-        Bind();
-
         const auto& verticesVec = vertices.GetVertices();
         _count = (Tbx::uint32)verticesVec.size();
         glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), verticesVec.data(), GL_STATIC_DRAW);
@@ -38,8 +36,6 @@ namespace OpenGLRendering
 
             index++;
         }
-
-        Unbind();
     }
 
     void OpenGLVertexBuffer::AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const
@@ -62,22 +58,18 @@ namespace OpenGLRendering
 
     OpenGLIndexBuffer::OpenGLIndexBuffer()
     {
-        _count = 0;
         glCreateBuffers(1, &_rendererId);
     }
 
     void OpenGLIndexBuffer::Upload(const std::vector<Tbx::uint32>& indices)
     {
-        Bind();
-
         _count = (Tbx::uint32)indices.size();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), indices.data(), GL_STATIC_DRAW);
-
-        Unbind();
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
     {
+        Unbind();
         glDeleteBuffers(1, &_rendererId);
     }
 
@@ -106,24 +98,14 @@ namespace OpenGLRendering
     void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
     {
         TBX_ASSERT(buffer.GetLayout().GetElements().size(), "Vertex buffer has no layout... a layout MUST be provided!");
-
-        glBindVertexArray(_rendererId);
-
-        _vertexBuffer = {};
+        _vertexBuffer.Bind();
         _vertexBuffer.Upload(buffer);
-
-        glBindVertexArray(0);
     }
 
     void OpenGLMesh::UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer)
     {
-        glBindVertexArray(_rendererId);
-
-        _indexBuffer = {};
-        _indexBuffer.Upload(buffer);
         _indexBuffer.Bind();
-
-        glBindVertexArray(0);
+        _indexBuffer.Upload(buffer);
     }
 
     void OpenGLMesh::Bind() const

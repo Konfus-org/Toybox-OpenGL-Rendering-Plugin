@@ -14,9 +14,6 @@ namespace OpenGLRendering
     {
         for (const auto& cmd : buffer.GetCommands())
         {
-            const GLenum error = glGetError();
-            TBX_ASSERT(error == GL_NO_ERROR, "OpenGL error : {}", error);
-
             switch (cmd.GetType())
             {
                 case Tbx::DrawCommandType::Clear:
@@ -61,7 +58,10 @@ namespace OpenGLRendering
                     break;
                 }
                 default:
+                {
+                    TBX_ASSERT(false, "Unknown draw command type!");
                     break;
+                }
             }
         }
     }
@@ -77,7 +77,6 @@ namespace OpenGLRendering
     {
         glClearColor(color.R, color.G, color.B, color.A);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        _context.SwapBuffers();
     }
 
     void OpenGLRenderer::Draw(const Tbx::Mesh& mesh)
@@ -86,12 +85,14 @@ namespace OpenGLRendering
         const auto& meshVertexBuffer = mesh.GetVertexBuffer();
         const auto& meshIndexBuffer = mesh.GetIndexBuffer();
 
-        OpenGLMesh glMesh;
+        OpenGLMesh glMesh = {};
+        glMesh.Bind();
         glMesh.UploadVertexBuffer(meshVertexBuffer);
         glMesh.UploadIndexBuffer(meshIndexBuffer);
-        glMesh.Bind();
 
         glDrawElements(GL_TRIANGLES, glMesh.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
+
+        _context.SwapBuffers();
     }
 
     void OpenGLRenderer::SetApi(Tbx::GraphicsApi api)
@@ -148,6 +149,7 @@ namespace OpenGLRendering
     void OpenGLRenderer::UploadShaderUniform(const Tbx::ShaderUniform& data)
     {
         const auto& mat = _materialCache[_activeMaterial];
+        mat.Bind();
         mat.UploadUniform(data);
     }
 }
