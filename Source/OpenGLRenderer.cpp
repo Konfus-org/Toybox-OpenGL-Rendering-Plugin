@@ -14,11 +14,8 @@ namespace OpenGLRendering
     {
         for (const auto& cmd : buffer.GetCommands())
         {
-            GLenum error;
-            while ((error = glGetError()) != GL_NO_ERROR) 
-            {
-                TBX_ASSERT(false, "OpenGL error : {}", );
-            }
+            const GLenum error = glGetError();
+            TBX_ASSERT(error == GL_NO_ERROR, "OpenGL error : {}", error);
 
             switch (cmd.GetType())
             {

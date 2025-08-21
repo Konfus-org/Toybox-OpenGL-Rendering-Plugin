@@ -18,9 +18,11 @@ namespace OpenGLRendering
 
     void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
     {
+        Bind();
+
         const auto& verticesVec = vertices.GetVertices();
         _count = (Tbx::uint32)verticesVec.size();
-        glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), vertices.GetVertices().data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), verticesVec.data(), GL_STATIC_DRAW);
 
         Tbx::uint32 index = 0;
         const auto& layout = vertices.GetLayout();
@@ -36,6 +38,8 @@ namespace OpenGLRendering
 
             index++;
         }
+
+        Unbind();
     }
 
     void OpenGLVertexBuffer::AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const
@@ -64,8 +68,12 @@ namespace OpenGLRendering
 
     void OpenGLIndexBuffer::Upload(const std::vector<Tbx::uint32>& indices)
     {
+        Bind();
+
         _count = (Tbx::uint32)indices.size();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), indices.data(), GL_STATIC_DRAW);
+
+        Unbind();
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -99,27 +107,32 @@ namespace OpenGLRendering
     {
         TBX_ASSERT(buffer.GetLayout().GetElements().size(), "Vertex buffer has no layout... a layout MUST be provided!");
 
+        glBindVertexArray(_rendererId);
+
         _vertexBuffer = {};
         _vertexBuffer.Upload(buffer);
+
+        glBindVertexArray(0);
     }
 
     void OpenGLMesh::UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer)
     {
+        glBindVertexArray(_rendererId);
+
         _indexBuffer = {};
         _indexBuffer.Upload(buffer);
+        _indexBuffer.Bind();
+
+        glBindVertexArray(0);
     }
 
     void OpenGLMesh::Bind() const
     {
-        _indexBuffer.Bind();
-        _vertexBuffer.Bind();
         glBindVertexArray(_rendererId);
     }
 
     void OpenGLMesh::Unbind() const
     {
-        _indexBuffer.Unbind();
-        _vertexBuffer.Unbind();
         glBindVertexArray(0);
     }
 }
