@@ -6,46 +6,46 @@
 namespace OpenGLRendering
 {
     ///// Helpers //////////////////////////////////////////////////////////////////
-    static Tbx::uint GetUniformLocation(const std::string name, Tbx::uint rendererId)
+    static Tbx::uint GetUniformLocation(const std::string name, Tbx::uint programId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
-        TBX_ASSERT(location != -1, "Invalid uniform location: {}", name);
+        GLint location = glGetUniformLocation(programId, name.c_str());
+        //TBX_ASSERT(location != -1, "Invalid uniform location: {}", name);
         return location;
     }
 
-    static void UploadUniformInt(const std::string& name, int value, Tbx::uint rendererId)
+    static void UploadUniformInt(const std::string& name, int value, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform1i(location, value);
     }
 
-    static void UploadUniformIntArray(const std::string& name, std::vector<int> values, Tbx::uint rendererId)
+    static void UploadUniformIntArray(const std::string& name, std::vector<int> values, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform1iv(location, (Tbx::uint32)values.size(), values.data());
     }
 
-    static void UploadUniformFloat(const std::string& name, float value, Tbx::uint rendererId)
+    static void UploadUniformFloat(const std::string& name, float value, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform1f(location, value);
     }
 
-    static void UploadUniformFloat2(const std::string& name, const Tbx::Vector2& value, Tbx::uint rendererId)
+    static void UploadUniformFloat2(const std::string& name, const Tbx::Vector2& value, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform2f(location, value.X, value.Y);
     }
 
-    static void UploadUniformFloat3(const std::string& name, const Tbx::Vector3& value, Tbx::uint rendererId)
+    static void UploadUniformFloat3(const std::string& name, const Tbx::Vector3& value, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform3f(location, value.X, value.Y, value.Z);
     }
 
-    static void UploadUniformFloat4(const std::string& name, const Tbx::Color& value, Tbx::uint rendererId)
+    static void UploadUniformFloat4(const std::string& name, const Tbx::Color& value, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform4f(location, value.R, value.G, value.B, value.A);
     }
 
@@ -56,28 +56,32 @@ namespace OpenGLRendering
     ////	glUniformMatrix3fv(location, 1, GL_FALSE, matrix.Values.data());
     ////}
 
-    static void UploadUniformMat4(const std::string& name, const Tbx::Mat4x4& matrix, Tbx::uint rendererId)
+    static void UploadUniformMat4(const std::string& name, const Tbx::Mat4x4& matrix, Tbx::uint programId)
     {
-        GLint location = GetUniformLocation(name.c_str(), rendererId);
+        GLint location = GetUniformLocation(name.c_str(), programId);
         glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Values.data());
     }
 
     ///// Shader //////////////////////////////////////////////////////////////////
-
-    void OpenGLShader::Compile(const Tbx::Shader& shader, Tbx::uint rendererId)
+    OpenGLShader::~OpenGLShader()
     {
-        // The code below is a lighty modified version of the example code found here:
-        // https://www.khronos.org/opengl/wiki/Shader_Compilation
+        glDeleteShader(_shaderId);
+    }
+
+    void OpenGLShader::Compile(const Tbx::Shader& shader, Tbx::uint programId)
+    {
+        _programId = programId;
+        _type = shader.GetType();
 
         // Create a shader handle
-        GLuint glShader;
+        _shaderId;
         if (shader.GetType() == Tbx::ShaderType::Vertex)
         {
-            glShader = glCreateShader(GL_VERTEX_SHADER);
+            _shaderId = glCreateShader(GL_VERTEX_SHADER);
         }
         else if (shader.GetType() == Tbx::ShaderType::Fragment)
         {
-            glShader = glCreateShader(GL_FRAGMENT_SHADER);
+            _shaderId = glCreateShader(GL_FRAGMENT_SHADER);
         }
         else
         {
@@ -87,69 +91,32 @@ namespace OpenGLRendering
         // Send the shader source code to GL
         // Note that std::string's .c_str is NULL character terminated.
         const auto* source = shader.GetSource().c_str();
-        glShaderSource(glShader, 1, &source, nullptr);
+        glShaderSource(_shaderId, 1, &source, nullptr);
 
         // Compile the vertex shader
-        glCompileShader(glShader);
+        glCompileShader(_shaderId);
 
         GLint isCompiled = 0;
-        glGetShaderiv(glShader, GL_COMPILE_STATUS, &isCompiled);
-        if (isCompiled == GL_FALSE)
+        glGetShaderiv(_shaderId, GL_COMPILE_STATUS, &isCompiled);
+        if (isCompiled == GL_FALSE) // Check if we failed compilation
         {
+            // Get the error
             GLint maxLength = 0;
-            glGetShaderiv(glShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-            // The maxLength includes the NULL character
+            glGetShaderiv(_shaderId, GL_INFO_LOG_LENGTH, &maxLength);
             std::vector<GLchar> infoLog(maxLength);
-            glGetShaderInfoLog(glShader, maxLength, &maxLength, &infoLog[0]);
+            glGetShaderInfoLog(_shaderId, maxLength, &maxLength, &infoLog[0]);
 
-            // We don't need the shader anymore.
-            glDeleteShader(glShader);
+            // Cleanup
+            glDeleteShader(_shaderId);
 
+            // Assert
             const auto& error = std::string(infoLog.data());
             TBX_ASSERT(false, "Shader compilation failure: {}", error);
-
-            // In this simple program, we'll just leave
             return;
         }
 
-        // Vertex and fragment shaders are successfully compiled.
-        // Now time to link them together into a program.
-        // Get a program object.
-        _rendererId = rendererId;
-
-        // Attach our shaders to our program
-        glAttachShader(_rendererId, glShader);
-
-        // Link our program
-        glLinkProgram(_rendererId);
-
-        // Note the different functions here: glGetProgram* instead of glGetShader*.
-        GLint isLinked = 0;
-        glGetProgramiv(_rendererId, GL_LINK_STATUS, &isLinked);
-        if (isLinked == GL_FALSE)
-        {
-            GLint maxLength = 0;
-            glGetProgramiv(_rendererId, GL_INFO_LOG_LENGTH, &maxLength);
-
-            // The maxLength includes the NULL character
-            std::vector<GLchar> infoLog(maxLength);
-            glGetProgramInfoLog(_rendererId, maxLength, &maxLength, &infoLog[0]);
-
-            // We don't need the program anymore.
-            glDeleteProgram(_rendererId);
-            // Don't leak shaders either.
-            glDeleteShader(glShader);
-
-            const auto& error = std::string(infoLog.data());
-            TBX_ASSERT(false, "Shader link failure: {0}", error);
-
-            // In this simple program, we'll just leave
-            return;
-        }
-
-        // Always detach shaders after a successful link.
-        glDetachShader(_rendererId, glShader);
+        // Attach our shader to our program
+        glAttachShader(_programId, _shaderId);
     }
 
     void OpenGLShader::UploadUniform(const Tbx::ShaderUniform& data) const
@@ -158,32 +125,32 @@ namespace OpenGLRendering
         {
             case Tbx::ShaderUniformDataType::Mat4:
             {
-                UploadUniformMat4(data.Name, std::any_cast<Tbx::Mat4x4>(data.Data), _rendererId);
+                UploadUniformMat4(data.Name, std::any_cast<Tbx::Mat4x4>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Float:
             {
-                UploadUniformFloat(data.Name, std::any_cast<float>(data.Data), _rendererId);
+                UploadUniformFloat(data.Name, std::any_cast<float>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Float2:
             {
-                UploadUniformFloat2(data.Name, std::any_cast<Tbx::Vector2>(data.Data), _rendererId);
+                UploadUniformFloat2(data.Name, std::any_cast<Tbx::Vector2>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Float3:
             {
-                UploadUniformFloat3(data.Name, std::any_cast<Tbx::Vector3>(data.Data), _rendererId);
+                UploadUniformFloat3(data.Name, std::any_cast<Tbx::Vector3>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Float4:
             {
-                UploadUniformFloat4(data.Name, std::any_cast<Tbx::Color>(data.Data), _rendererId);
+                UploadUniformFloat4(data.Name, std::any_cast<Tbx::Color>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Int:
             {
-                UploadUniformInt(data.Name, std::any_cast<int>(data.Data), _rendererId);
+                UploadUniformInt(data.Name, std::any_cast<int>(data.Data), _programId);
                 break;
             }
             default:
@@ -192,6 +159,11 @@ namespace OpenGLRendering
                 break;
             }
         }
+    }
+
+    void OpenGLShader::Detach() const
+    {
+        glDetachShader(_programId, _shaderId);
     }
 
     ///// Material //////////////////////////////////////////////////////////////////
@@ -206,18 +178,56 @@ namespace OpenGLRendering
     {
         _rendererId = glCreateProgram();
 
-        for (const auto& shader : material.GetShaders())
+        // The code below is a lighty modified version of the example code found here:
+        // https://www.khronos.org/opengl/wiki/Shader_Compilation:
         {
-            auto& glShader = _shaders.emplace_back();
-            glShader.Compile(shader, _rendererId);
+            // Compile shaders
+            for (const auto& shader : material.GetShaders())
+            {
+                auto& glShader = _shaders.emplace_back();
+                glShader.Compile(shader, _rendererId);
+            }
+
+            // Link our program
+            glLinkProgram(_rendererId);
+
+            // Note the different functions here: glGetProgram* instead of glGetShader*.
+            GLint isLinked = 0;
+            glGetProgramiv(_rendererId, GL_LINK_STATUS, &isLinked);
+            if (isLinked == GL_FALSE) // Check if we failed linking
+            {
+                // Get the error
+                GLint maxLength = 0;
+                glGetProgramiv(_rendererId, GL_INFO_LOG_LENGTH, &maxLength);
+                std::vector<GLchar> infoLog(maxLength);
+                glGetProgramInfoLog(_rendererId, maxLength, &maxLength, &infoLog[0]);
+
+                // Cleanup
+                glDeleteProgram(_rendererId);
+                _shaders.clear();
+
+                // Assert
+                const auto& error = std::string(infoLog.data());
+                TBX_ASSERT(false, "Shader link failure: {0}", error);
+                return;
+            }
+
+            // Detach after successful link
+            for (const auto& shader : _shaders)
+            {
+                shader.Detach();
+            }
         }
 
-        Tbx::uint slot = 0;
-        for (const auto& texture : material.GetTextures())
+        // Lastly upload textures
         {
-            auto& glTexture = _textures.emplace_back();
-            glTexture.Upload(texture, slot);
-            slot++;
+            Tbx::uint slot = 0;
+            for (const auto& texture : material.GetTextures())
+            {
+                auto& glTexture = _textures.emplace_back();
+                glTexture.Upload(texture, slot);
+                slot++;
+            }
         }
     }
 

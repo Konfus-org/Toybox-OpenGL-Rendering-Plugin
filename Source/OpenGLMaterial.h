@@ -10,11 +10,15 @@ namespace OpenGLRendering
     class OpenGLShader
     {
     public:
-        void Compile(const Tbx::Shader& shader, Tbx::uint rendererId);
+        ~OpenGLShader();
+        void Compile(const Tbx::Shader& shader, Tbx::uint programId);
         void UploadUniform(const Tbx::ShaderUniform& data) const;
+        void Detach() const;
 
     private:
-        Tbx::uint _rendererId = -1;
+        Tbx::uint _programId = -1;
+        Tbx::uint _shaderId = -1;
+        Tbx::ShaderType _type = Tbx::ShaderType::None;
     };
 
     class OpenGLMaterial : public IBindable

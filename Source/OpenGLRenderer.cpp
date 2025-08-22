@@ -107,6 +107,7 @@ namespace OpenGLRendering
 
     void OpenGLRenderer::SetResolution(const Tbx::Size& size)
     {
+        _resolution = size;
     }
 
     Tbx::Size OpenGLRenderer::GetResolution()
