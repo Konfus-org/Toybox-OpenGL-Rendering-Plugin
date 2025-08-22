@@ -6,39 +6,46 @@
 namespace OpenGLRendering
 {
     ///// Helpers //////////////////////////////////////////////////////////////////
-    static void UploadUniformInt(const std::string& name, int value, Tbx::uint rendererId)
+    static Tbx::uint GetUniformLocation(const std::string name, Tbx::uint rendererId)
     {
         GLint location = glGetUniformLocation(rendererId, name.c_str());
+        TBX_ASSERT(location != -1, "Invalid uniform location: {}", name);
+        return location;
+    }
+
+    static void UploadUniformInt(const std::string& name, int value, Tbx::uint rendererId)
+    {
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform1i(location, value);
     }
 
     static void UploadUniformIntArray(const std::string& name, std::vector<int> values, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform1iv(location, (Tbx::uint32)values.size(), values.data());
     }
 
     static void UploadUniformFloat(const std::string& name, float value, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform1f(location, value);
     }
 
     static void UploadUniformFloat2(const std::string& name, const Tbx::Vector2& value, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform2f(location, value.X, value.Y);
     }
 
     static void UploadUniformFloat3(const std::string& name, const Tbx::Vector3& value, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform3f(location, value.X, value.Y, value.Z);
     }
 
     static void UploadUniformFloat4(const std::string& name, const Tbx::Color& value, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniform4f(location, value.R, value.G, value.B, value.A);
     }
 
@@ -51,7 +58,7 @@ namespace OpenGLRendering
 
     static void UploadUniformMat4(const std::string& name, const Tbx::Mat4x4& matrix, Tbx::uint rendererId)
     {
-        GLint location = glGetUniformLocation(rendererId, name.c_str());
+        GLint location = GetUniformLocation(name.c_str(), rendererId);
         glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Values.data());
     }
 
@@ -198,6 +205,7 @@ namespace OpenGLRendering
     void OpenGLMaterial::Upload(const Tbx::Material& material)
     {
         _rendererId = glCreateProgram();
+
         for (const auto& shader : material.GetShaders())
         {
             auto& glShader = _shaders.emplace_back();
@@ -215,22 +223,21 @@ namespace OpenGLRendering
 
     void OpenGLMaterial::Bind() const
     {
-        glUseProgram(_rendererId);
-
         for (const auto& tex : _textures)
         {
             tex.Bind();
         }
+        glUseProgram(_rendererId);
+
     }
 
     void OpenGLMaterial::Unbind() const
     {
-        glUseProgram(0);
-
         for (const auto& tex : _textures)
         {
             tex.Unbind();
         }
+        glUseProgram(0);
     }
 
     void OpenGLMaterial::UploadUniform(const Tbx::ShaderUniform& data) const
