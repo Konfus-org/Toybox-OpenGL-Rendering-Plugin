@@ -64,6 +64,8 @@ namespace OpenGLRendering
                 }
             }
         }
+
+        _context.SwapBuffers();
     }
 
     void OpenGLRenderer::Flush()
@@ -91,8 +93,6 @@ namespace OpenGLRendering
         glMesh.UploadIndexBuffer(meshIndexBuffer);
 
         glDrawElements(GL_TRIANGLES, glMesh.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
-
-        _context.SwapBuffers();
     }
 
     void OpenGLRenderer::SetApi(Tbx::GraphicsApi api)

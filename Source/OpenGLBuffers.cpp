@@ -7,13 +7,13 @@ namespace OpenGLRendering
 
     OpenGLVertexBuffer::OpenGLVertexBuffer()
     {
-        glCreateBuffers(1, &_rendererId);
+        glCreateBuffers(1, &_vertBufferGLId);
     }
 
     OpenGLVertexBuffer::~OpenGLVertexBuffer()
     {
         Unbind();
-        glDeleteBuffers(1, &_rendererId);
+        glDeleteBuffers(1, &_vertBufferGLId);
     }
 
     void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
@@ -46,7 +46,7 @@ namespace OpenGLRendering
 
     void OpenGLVertexBuffer::Bind() const
     {
-        glBindBuffer(GL_ARRAY_BUFFER, _rendererId);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertBufferGLId);
     }
 
     void OpenGLVertexBuffer::Unbind() const
@@ -58,7 +58,7 @@ namespace OpenGLRendering
 
     OpenGLIndexBuffer::OpenGLIndexBuffer()
     {
-        glCreateBuffers(1, &_rendererId);
+        glCreateBuffers(1, &_indexBuffGLId);
     }
 
     void OpenGLIndexBuffer::Upload(const std::vector<Tbx::uint32>& indices)
@@ -70,12 +70,12 @@ namespace OpenGLRendering
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
     {
         Unbind();
-        glDeleteBuffers(1, &_rendererId);
+        glDeleteBuffers(1, &_indexBuffGLId);
     }
 
     void OpenGLIndexBuffer::Bind() const
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _rendererId);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffGLId);
     }
 
     void OpenGLIndexBuffer::Unbind() const

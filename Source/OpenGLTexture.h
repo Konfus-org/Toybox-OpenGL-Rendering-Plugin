@@ -17,7 +17,7 @@ namespace OpenGLRendering
 
     private:
         Tbx::uint _slot = 0;
-        Tbx::uint32 _rendererId = -1;
+        Tbx::uint32 _textureGLId = -1;
     };
 }
 

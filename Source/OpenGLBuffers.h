@@ -21,7 +21,7 @@ namespace OpenGLRendering
         Tbx::uint32 GetCount() const { return _count; }
 
     private:
-        Tbx::uint32 _rendererId = -1;
+        Tbx::uint32 _vertBufferGLId = -1;
         Tbx::uint32 _count = 0;
     };
 
@@ -38,7 +38,7 @@ namespace OpenGLRendering
         Tbx::uint32 GetCount() const { return _count; }
 
     private:
-        Tbx::uint32 _rendererId = -1;
+        Tbx::uint32 _indexBuffGLId = -1;
         Tbx::uint32 _count = 0;
     };
 

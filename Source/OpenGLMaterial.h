@@ -33,7 +33,7 @@ namespace OpenGLRendering
         void UploadUniform(const Tbx::ShaderUniform& data) const;
 
     private:
-        Tbx::uint _rendererId = -1;
+        Tbx::uint _materialGLId = -1;
         std::vector<OpenGLShader> _shaders = {};
         std::vector<OpenGLTexture> _textures = {};
     };

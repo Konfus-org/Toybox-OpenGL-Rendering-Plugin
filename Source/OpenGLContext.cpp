@@ -57,20 +57,38 @@ namespace OpenGLRendering
             GL_FALSE);
         glDebugMessageCallback(GlMessageCallback, 0);
 #endif
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
     }
 
     void OpenGLContext::SwapBuffers()
     {
+        if (_renderSurface.expired() || _renderSurface.lock() == nullptr)
+        {
+            return;
+        }
+
         _renderSurface.lock()->SwapBuffers();
     }
 
     int OpenGLContext::GetSwapInterval() const
     {
+        if (_renderSurface.expired() || _renderSurface.lock() == nullptr)
+        {
+            return 0;
+        }
+
         return _renderSurface.lock()->GetSwapInterval();
     }
 
     void OpenGLContext::SetSwapInterval(int interval) const
     {
+        if (_renderSurface.expired() || _renderSurface.lock() == nullptr)
+        {
+            return;
+        }
+
         _renderSurface.lock()->SetSwapInterval(interval);
     }
 

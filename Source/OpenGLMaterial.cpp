@@ -171,12 +171,12 @@ namespace OpenGLRendering
     OpenGLMaterial::~OpenGLMaterial()
     {
         glUseProgram(0);
-        glDeleteProgram(_rendererId);
+        glDeleteProgram(_materialGLId);
     }
 
     void OpenGLMaterial::Upload(const Tbx::Material& material)
     {
-        _rendererId = glCreateProgram();
+        _materialGLId = glCreateProgram();
 
         // The code below is a lighty modified version of the example code found here:
         // https://www.khronos.org/opengl/wiki/Shader_Compilation:
@@ -185,25 +185,25 @@ namespace OpenGLRendering
             for (const auto& shader : material.GetShaders())
             {
                 auto& glShader = _shaders.emplace_back();
-                glShader.Compile(shader, _rendererId);
+                glShader.Compile(shader, _materialGLId);
             }
 
             // Link our program
-            glLinkProgram(_rendererId);
+            glLinkProgram(_materialGLId);
 
             // Note the different functions here: glGetProgram* instead of glGetShader*.
             GLint isLinked = 0;
-            glGetProgramiv(_rendererId, GL_LINK_STATUS, &isLinked);
+            glGetProgramiv(_materialGLId, GL_LINK_STATUS, &isLinked);
             if (isLinked == GL_FALSE) // Check if we failed linking
             {
                 // Get the error
                 GLint maxLength = 0;
-                glGetProgramiv(_rendererId, GL_INFO_LOG_LENGTH, &maxLength);
+                glGetProgramiv(_materialGLId, GL_INFO_LOG_LENGTH, &maxLength);
                 std::vector<GLchar> infoLog(maxLength);
-                glGetProgramInfoLog(_rendererId, maxLength, &maxLength, &infoLog[0]);
+                glGetProgramInfoLog(_materialGLId, maxLength, &maxLength, &infoLog[0]);
 
                 // Cleanup
-                glDeleteProgram(_rendererId);
+                glDeleteProgram(_materialGLId);
                 _shaders.clear();
 
                 // Assert
@@ -221,6 +221,7 @@ namespace OpenGLRendering
 
         // Lastly upload textures
         {
+            glUseProgram(_materialGLId);
             Tbx::uint slot = 0;
             for (const auto& texture : material.GetTextures())
             {
@@ -233,21 +234,20 @@ namespace OpenGLRendering
 
     void OpenGLMaterial::Bind() const
     {
+        glUseProgram(_materialGLId);
         for (const auto& tex : _textures)
         {
             tex.Bind();
         }
-        glUseProgram(_rendererId);
-
     }
 
     void OpenGLMaterial::Unbind() const
     {
+        glUseProgram(0);
         for (const auto& tex : _textures)
         {
             tex.Unbind();
         }
-        glUseProgram(0);
     }
 
     void OpenGLMaterial::UploadUniform(const Tbx::ShaderUniform& data) const
