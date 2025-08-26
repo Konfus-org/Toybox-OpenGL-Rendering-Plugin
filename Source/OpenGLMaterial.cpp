@@ -218,36 +218,16 @@ namespace OpenGLRendering
                 shader.Detach();
             }
         }
-
-        // Lastly upload textures
-        {
-            glUseProgram(_materialGLId);
-            Tbx::uint slot = 0;
-            for (const auto& texture : material.GetTextures())
-            {
-                auto& glTexture = _textures.emplace_back();
-                glTexture.Upload(texture, slot);
-                slot++;
-            }
-        }
     }
 
     void OpenGLMaterial::Bind() const
     {
         glUseProgram(_materialGLId);
-        for (const auto& tex : _textures)
-        {
-            tex.Bind();
-        }
     }
 
     void OpenGLMaterial::Unbind() const
     {
         glUseProgram(0);
-        for (const auto& tex : _textures)
-        {
-            tex.Unbind();
-        }
     }
 
     void OpenGLMaterial::UploadUniform(const Tbx::ShaderUniform& data) const
@@ -258,4 +238,42 @@ namespace OpenGLRendering
         }
     }
 
+    ///// Material Instance //////////////////////////////////////////////////////////////////
+
+    void OpenGLMaterialInstance::Upload(const Tbx::MaterialInstance& material)
+    {
+        _material.Bind();
+        Tbx::uint slot = 0;
+        for (const auto& texture : material.GetTextures())
+        {
+            auto& glTexture = _textures.emplace_back();
+            glTexture.Upload(texture, slot);
+            slot++;
+        }
+        _material.Unbind();
+    }
+
+    void OpenGLMaterialInstance::Bind() const
+    {
+        _material.Bind();
+        for (const auto& tex : _textures)
+        {
+            tex.Bind();
+        }
+    }
+
+    void OpenGLMaterialInstance::Unbind() const
+    {
+        _material.Unbind();
+        for (const auto& tex : _textures)
+        {
+            tex.Unbind();
+        }
+    }
+
+    void OpenGLMaterialInstance::UploadUniform(const Tbx::ShaderUniform& data) const
+    {
+        _material.Bind();
+        _material.UploadUniform(data);
+    }
 }

@@ -32,15 +32,20 @@ namespace OpenGLRendering
         void SetVSyncEnabled(bool enabled) override;
         bool GetVSyncEnabled() override;
 
+    private:
+        void FinalizeFrame();
         void Draw(const Tbx::Mesh& mesh);
-
-        void UploadMaterial(const Tbx::Material& material);
+        void BindActiveMaterial();
+        void UnbindActiveMaterial();
+        const OpenGLMaterialInstance& GetActiveMaterial();
+        void SetMaterial(const Tbx::MaterialInstance& mat);
+        void UploadMaterial(const Tbx::MaterialInstance& materialInstance);
         void UploadTexture(const Tbx::Texture& texture, const Tbx::uint& slot);
         void UploadShaderUniform(const Tbx::ShaderUniform& data);
 
-    private:
         Tbx::Uid _activeMaterial = Tbx::Invalid::Uid;
         std::unordered_map<Tbx::Uid, OpenGLMaterial> _materialCache = {};
+        std::unordered_map<Tbx::Uid, OpenGLMaterialInstance> _materialInstanceCache = {};
         Tbx::Size _resolution = {};
         Tbx::Viewport _viewport = {};
         OpenGLContext _context = {};

@@ -7,37 +7,6 @@
 
 namespace OpenGLRendering
 {
-    class OpenGLShader
-    {
-    public:
-        ~OpenGLShader();
-        void Compile(const Tbx::Shader& shader, Tbx::uint programId);
-        void UploadUniform(const Tbx::ShaderUniform& data) const;
-        void Detach() const;
-
-    private:
-        Tbx::uint _programId = -1;
-        Tbx::uint _shaderId = -1;
-        Tbx::ShaderType _type = Tbx::ShaderType::None;
-    };
-
-    class OpenGLMaterial : public IBindable
-    {
-    public:
-        OpenGLMaterial() = default;
-        ~OpenGLMaterial() final;
-
-        void Upload(const Tbx::Material& material);
-        void Bind() const final;
-        void Unbind() const final;
-        void UploadUniform(const Tbx::ShaderUniform& data) const;
-
-    private:
-        Tbx::uint _materialGLId = -1;
-        std::vector<OpenGLShader> _shaders = {};
-        std::vector<OpenGLTexture> _textures = {};
-    };
-
     static GLenum ShaderUniformTypeToOpenGLType(const Tbx::ShaderUniformDataType& type)
     {
         using enum Tbx::ShaderUniformDataType;
@@ -60,5 +29,55 @@ namespace OpenGLRendering
         TBX_ASSERT(false, "Couln not convert to OpenGL type from ShaderDataType, given unknown ShaderDataType!");
         return GL_NONE;
     }
+
+    class OpenGLShader
+    {
+    public:
+        ~OpenGLShader();
+        void Compile(const Tbx::Shader& shader, Tbx::uint programId);
+        void UploadUniform(const Tbx::ShaderUniform& data) const;
+        void Detach() const;
+
+    private:
+        Tbx::uint _programId = -1;
+        Tbx::uint _shaderId = -1;
+        Tbx::ShaderType _type = Tbx::ShaderType::None;
+    };
+
+    class OpenGLMaterial : public IBindable
+    {
+    public:
+        OpenGLMaterial() = default;
+        ~OpenGLMaterial() final;
+
+        void Upload(const Tbx::Material& material);
+        void UploadUniform(const Tbx::ShaderUniform& data) const;
+        void Bind() const final;
+        void Unbind() const final;
+
+    private:
+        Tbx::uint _materialGLId = -1;
+        std::vector<OpenGLShader> _shaders = {};
+    };
+
+    static OpenGLMaterial DefaultMaterial = {};
+
+    class OpenGLMaterialInstance : public IBindable
+    {
+    public:
+        OpenGLMaterialInstance()
+            : _material(DefaultMaterial) {}
+        OpenGLMaterialInstance(const OpenGLMaterial& material)
+            : _material(material) {}
+
+        void Upload(const Tbx::MaterialInstance& material);
+        void UploadUniform(const Tbx::ShaderUniform& data) const;
+        void Bind() const final;
+        void Unbind() const final;
+
+    private:
+        const OpenGLMaterial& _material;
+        std::vector<OpenGLTexture> _textures = {};
+    };
 }
 

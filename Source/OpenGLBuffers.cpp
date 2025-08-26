@@ -115,6 +115,8 @@ namespace OpenGLRendering
 
     void OpenGLMesh::Unbind() const
     {
+        _vertexBuffer.Unbind();
+        _indexBuffer.Unbind();
         glBindVertexArray(0);
     }
 }
