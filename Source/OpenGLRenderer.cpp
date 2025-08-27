@@ -126,7 +126,6 @@ namespace OpenGLRendering
     void OpenGLRenderer::FinalizeFrame()
     {
         UnbindActiveMaterial();
-        _context.SwapBuffers();
     }
 
     void OpenGLRenderer::Draw(const Tbx::Mesh& mesh)
