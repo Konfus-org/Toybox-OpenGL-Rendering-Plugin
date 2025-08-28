@@ -1,7 +1,12 @@
 {
     "name": "OpenGL Rendering",
     "lib": "OpenGL Rendering.dll",
-    "priority": "2",
+    "dependencies": [
+        "Windowing"
+    ],
+    "type": [
+        "Renderer Factory"
+    ],
     "language": "C++",
     "version": "0.0.1",
     "author": "Konfus-dev",
