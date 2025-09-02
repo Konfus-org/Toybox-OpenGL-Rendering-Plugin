@@ -49,12 +49,20 @@ namespace OpenGLRendering
                     UploadShaderUniform(uniform);
                     break;
                 }
+                case Tbx::DrawCommandType::UploadMesh:
+                {
+                    TBX_TRACE_VERBOSE("GL RENDERER: Uploading mesh");
+
+                    const auto& mesh = std::any_cast<const Tbx::Mesh&>(cmd.GetPayload());
+                    UploadMesh(mesh);
+                    break;
+                }
                 case Tbx::DrawCommandType::DrawMesh:
                 {
                     TBX_TRACE_VERBOSE("GL RENDERER: Drawing mesh");
 
                     const auto& mesh = std::any_cast<const Tbx::Mesh&>(cmd.GetPayload());
-                    Draw(mesh);
+                    DrawMesh(mesh);
                     break;
                 }
                 default:
@@ -125,45 +133,39 @@ namespace OpenGLRendering
 
     void OpenGLRenderer::FinalizeFrame()
     {
-        UnbindActiveMaterial();
-    }
-
-    void OpenGLRenderer::Draw(const Tbx::Mesh& mesh)
-    {
-        // TODO: we could prolly have some sorta mesh cache/instancing
-        const auto& meshVertexBuffer = mesh.GetVertexBuffer();
-        const auto& meshIndexBuffer = mesh.GetIndexBuffer();
-
-        OpenGLMesh glMesh = {};
-        glMesh.Bind();
-        glMesh.UploadVertexBuffer(meshVertexBuffer);
-        glMesh.UploadIndexBuffer(meshIndexBuffer);
-
-        glDrawElements(GL_TRIANGLES, glMesh.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, 0);
-
-        glMesh.Unbind();
-    }
-
-    void OpenGLRenderer::BindActiveMaterial()
-    {
-        _materialInstanceCache[_activeMaterial].Bind();
-    }
-
-    void OpenGLRenderer::UnbindActiveMaterial()
-    {
         _materialInstanceCache[_activeMaterial].Unbind();
     }
 
-    const OpenGLMaterialInstance& OpenGLRenderer::GetActiveMaterial()
+    void OpenGLRenderer::DrawMesh(const Tbx::Mesh& mesh)
     {
-        return _materialInstanceCache[_activeMaterial];
+        const auto& meshId = mesh.GetId();
+        auto& glMesh = _meshCache[meshId];
+        glMesh.Bind();
+        glDrawElements(GL_TRIANGLES, glMesh.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, 0);
+    }
+
+    void OpenGLRenderer::UploadMesh(const Tbx::Mesh& mesh)
+    {
+        // TODO: Implement mesh instancing
+        const auto& meshId = mesh.GetId();
+        if (!_meshCache.contains(meshId))
+        {
+            _meshCache.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(meshId),
+                std::forward_as_tuple());
+            auto& glMesh = _meshCache[meshId];
+            glMesh.Bind();
+            glMesh.UploadVertexBuffer(mesh.GetVertexBuffer());
+            glMesh.UploadIndexBuffer(mesh.GetIndexBuffer());
+        }
     }
 
     void OpenGLRenderer::SetMaterial(const Tbx::MaterialInstance& mat)
     {
-        UnbindActiveMaterial();
+        _materialInstanceCache[_activeMaterial].Unbind();
         _activeMaterial = mat.GetId();
-        BindActiveMaterial();
+        _materialInstanceCache[_activeMaterial].Bind();
     }
 
     void OpenGLRenderer::UploadMaterial(const Tbx::MaterialInstance& materialInstance)
@@ -179,16 +181,19 @@ namespace OpenGLRendering
         }
 
         const auto& materialInstanceId = materialInstance.GetId();
-        _materialInstanceCache.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(materialInstanceId),
-            std::forward_as_tuple(_materialCache[materialId]));
-        _materialInstanceCache[materialInstanceId].Upload(materialInstance);
+        if (!_materialInstanceCache.contains(materialInstanceId))
+        {
+            _materialInstanceCache.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(materialInstanceId),
+                std::forward_as_tuple(_materialCache[materialId]));
+            _materialInstanceCache[materialInstanceId].Upload(materialInstance);
+        }
     }
 
     void OpenGLRenderer::UploadShaderUniform(const Tbx::ShaderUniform& data)
     {
-        const auto& mat = GetActiveMaterial();
+        const auto& mat = _materialInstanceCache[_activeMaterial];
         mat.UploadUniform(data);
     }
 }

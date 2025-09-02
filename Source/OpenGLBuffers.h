@@ -41,25 +41,4 @@ namespace OpenGLRendering
         Tbx::uint32 _indexBuffGLId = -1;
         Tbx::uint32 _count = 0;
     };
-
-    class OpenGLMesh : public IBindable
-    {
-    public:
-        OpenGLMesh();
-        ~OpenGLMesh() final;
-
-        void Bind() const final;
-        void Unbind() const final;
-
-        void UploadVertexBuffer(const Tbx::VertexBuffer& buffer);
-        void UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer);
-
-        const OpenGLVertexBuffer& GetVertexBuffer() const { return _vertexBuffer; }
-        const OpenGLIndexBuffer& GetIndexBuffer() const { return _indexBuffer; }
-
-    private:
-        OpenGLVertexBuffer _vertexBuffer;
-        OpenGLIndexBuffer _indexBuffer;
-        Tbx::uint32 _rendererId = -1;
-    };
 }

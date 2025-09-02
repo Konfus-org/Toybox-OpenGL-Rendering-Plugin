@@ -82,41 +82,4 @@ namespace OpenGLRendering
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
-
-    /// Vertex Array ////////////////////////////////////////////////////////////
-
-    OpenGLMesh::OpenGLMesh()
-    {
-        glGenVertexArrays(1, &_rendererId);
-    }
-
-    OpenGLMesh::~OpenGLMesh()
-    {
-        glDeleteVertexArrays(1, &_rendererId);
-    }
-
-    void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
-    {
-        TBX_ASSERT(buffer.GetLayout().GetElements().size(), "Vertex buffer has no layout... a layout MUST be provided!");
-        _vertexBuffer.Bind();
-        _vertexBuffer.Upload(buffer);
-    }
-
-    void OpenGLMesh::UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer)
-    {
-        _indexBuffer.Bind();
-        _indexBuffer.Upload(buffer);
-    }
-
-    void OpenGLMesh::Bind() const
-    {
-        glBindVertexArray(_rendererId);
-    }
-
-    void OpenGLMesh::Unbind() const
-    {
-        _vertexBuffer.Unbind();
-        _indexBuffer.Unbind();
-        glBindVertexArray(0);
-    }
 }

@@ -2,6 +2,7 @@
 #include "OpenGLContext.h"
 #include "OpenGLBuffers.h"
 #include "OpenGLMaterial.h"
+#include "OpenGLMesh.h"
 #include <glad/glad.h>
 #include <Tbx/Graphics/IRenderer.h>
 #include <Tbx/Graphics/Texture.h>
@@ -34,16 +35,19 @@ namespace OpenGLRendering
 
     private:
         void FinalizeFrame();
-        void Draw(const Tbx::Mesh& mesh);
-        void BindActiveMaterial();
-        void UnbindActiveMaterial();
-        const OpenGLMaterialInstance& GetActiveMaterial();
+
+        void DrawMesh(const Tbx::Mesh& mesh);
+        void UploadMesh(const Tbx::Mesh& mesh);
+
         void SetMaterial(const Tbx::MaterialInstance& mat);
         void UploadMaterial(const Tbx::MaterialInstance& materialInstance);
+
         void UploadTexture(const Tbx::Texture& texture, const Tbx::uint& slot);
+
         void UploadShaderUniform(const Tbx::ShaderUniform& data);
 
         Tbx::Uid _activeMaterial = Tbx::Invalid::Uid;
+        std::unordered_map<Tbx::Uid, OpenGLMesh> _meshCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterial> _materialCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterialInstance> _materialInstanceCache = {};
         Tbx::Size _resolution = {};
