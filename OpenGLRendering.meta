@@ -1,6 +1,6 @@
 {
     "name": "OpenGL Rendering",
-    "lib": "OpenGL Rendering.dll",
+    "lib": "OpenGLRendering.dll",
     "dependencies": [
         "Windowing"
     ],
