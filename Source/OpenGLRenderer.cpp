@@ -79,7 +79,7 @@ namespace OpenGLRendering
     void OpenGLRenderer::Flush()
     {
         _materialCache.clear();
-        auto clearColor = Tbx::App::GetInstance()->GetGraphicsSettings().ClearColor;
+        const auto& clearColor = Tbx::App::GetInstance()->GetGraphicsSettings().ClearColor;
         Clear(clearColor);
     }
 

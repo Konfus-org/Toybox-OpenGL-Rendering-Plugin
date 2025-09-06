@@ -19,7 +19,7 @@ namespace OpenGLRendering
         void Process(const Tbx::FrameBuffer& buffer) override;
 
         void Flush() override;
-        void Clear(const Tbx::Color& color) override;
+        void Clear(const Tbx::RgbaColor& color) override;
 
         void SetApi(Tbx::GraphicsApi api) override;
         Tbx::GraphicsApi GetApi() override;

@@ -145,7 +145,7 @@ namespace OpenGLRendering
             }
             case Tbx::ShaderUniformDataType::Float4:
             {
-                UploadUniformFloat4(data.Name, std::any_cast<Tbx::Color>(data.Data), _programId);
+                UploadUniformFloat4(data.Name, std::any_cast<Tbx::RgbaColor>(data.Data), _programId);
                 break;
             }
             case Tbx::ShaderUniformDataType::Int:
