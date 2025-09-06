@@ -112,7 +112,7 @@ namespace OpenGLRendering
     void OpenGLRenderer::SetViewport(const Tbx::Viewport& viewport)
     {
         _viewport = viewport;
-        glViewport((GLint)viewport.Position.X, (GLint)viewport.Position.Y, viewport.Size.Width, viewport.Size.Height);
+        glViewport((GLint)viewport.Position.X, (GLint)viewport.Position.Y, viewport.Extends.Width, viewport.Extends.Height);
     }
 
     Tbx::Viewport OpenGLRenderer::GetViewport()
