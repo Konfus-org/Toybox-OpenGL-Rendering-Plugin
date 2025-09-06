@@ -43,7 +43,7 @@ namespace OpenGLRendering
         glUniform3f(location, value.X, value.Y, value.Z);
     }
 
-    static void UploadUniformFloat4(const std::string& name, const Tbx::Color& value, Tbx::uint programId)
+    static void UploadUniformFloat4(const std::string& name, const Tbx::RgbaColor& value, Tbx::uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform4f(location, value.R, value.G, value.B, value.A);

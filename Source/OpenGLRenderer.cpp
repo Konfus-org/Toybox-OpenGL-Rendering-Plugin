@@ -21,7 +21,7 @@ namespace OpenGLRendering
                 {
                     TBX_TRACE_VERBOSE("GL RENDERER: Clearing color buffer");
 
-                    const auto& color = std::any_cast<const Tbx::Color&>(cmd.GetPayload());
+                    const auto& color = std::any_cast<const Tbx::RgbaColor&>(cmd.GetPayload());
                     Clear(color);
                     break;
                 }
@@ -83,7 +83,7 @@ namespace OpenGLRendering
         Clear(clearColor);
     }
 
-    void OpenGLRenderer::Clear(const Tbx::Color& color)
+    void OpenGLRenderer::Clear(const Tbx::RgbaColor& color)
     {
         glClearColor(color.R, color.G, color.B, color.A);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
