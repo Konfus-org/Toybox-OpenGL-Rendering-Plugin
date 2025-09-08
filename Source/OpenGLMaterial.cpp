@@ -123,32 +123,38 @@ namespace OpenGLRendering
     {
         switch (data.DataType)
         {
-            case Tbx::ShaderUniformDataType::Mat4:
+            using enum Tbx::ShaderUniformDataType;
+            case None:
+            {
+                TBX_TRACE_WARNING("Attempted to upload NONE uniform type!");
+                break;
+            }
+            case Mat4:
             {
                 UploadUniformMat4(data.Name, std::any_cast<Tbx::Mat4x4>(data.Data), _programId);
                 break;
             }
-            case Tbx::ShaderUniformDataType::Float:
+            case Float:
             {
                 UploadUniformFloat(data.Name, std::any_cast<float>(data.Data), _programId);
                 break;
             }
-            case Tbx::ShaderUniformDataType::Float2:
+            case Float2:
             {
                 UploadUniformFloat2(data.Name, std::any_cast<Tbx::Vector2>(data.Data), _programId);
                 break;
             }
-            case Tbx::ShaderUniformDataType::Float3:
+            case Float3:
             {
                 UploadUniformFloat3(data.Name, std::any_cast<Tbx::Vector3>(data.Data), _programId);
                 break;
             }
-            case Tbx::ShaderUniformDataType::Float4:
+            case Float4:
             {
                 UploadUniformFloat4(data.Name, std::any_cast<Tbx::RgbaColor>(data.Data), _programId);
                 break;
             }
-            case Tbx::ShaderUniformDataType::Int:
+            case Int:
             {
                 UploadUniformInt(data.Name, std::any_cast<int>(data.Data), _programId);
                 break;
