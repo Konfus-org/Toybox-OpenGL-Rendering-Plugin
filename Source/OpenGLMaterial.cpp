@@ -277,7 +277,7 @@ namespace OpenGLRendering
         }
     }
 
-    void OpenGLMaterialInstance::UploadUniform(const Tbx::ShaderUniform& data) const
+    void OpenGLMaterialInstance::SetUniform(const Tbx::ShaderUniform& data) const
     {
         _material.Bind();
         _material.UploadUniform(data);

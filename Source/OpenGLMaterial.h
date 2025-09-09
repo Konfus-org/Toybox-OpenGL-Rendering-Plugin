@@ -71,7 +71,7 @@ namespace OpenGLRendering
             : _material(material) {}
 
         void Upload(const Tbx::MaterialInstance& material);
-        void UploadUniform(const Tbx::ShaderUniform& data) const;
+        void SetUniform(const Tbx::ShaderUniform& data) const;
         void Bind() const final;
         void Unbind() const final;
 

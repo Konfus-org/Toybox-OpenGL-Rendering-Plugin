@@ -44,7 +44,7 @@ namespace OpenGLRendering
 
         void UploadTexture(const Tbx::Texture& texture, const Tbx::uint& slot);
 
-        void UploadShaderUniform(const Tbx::ShaderUniform& data);
+        void SetUniform(const Tbx::ShaderUniform& data);
 
         Tbx::Uid _activeMaterial = Tbx::Invalid::Uid;
         std::unordered_map<Tbx::Uid, OpenGLMesh> _meshCache = {};

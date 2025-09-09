@@ -25,7 +25,7 @@ namespace OpenGLRendering
                     Clear(color);
                     break;
                 }
-                case Tbx::DrawCommandType::CompileMaterial:
+                case Tbx::DrawCommandType::UploadMaterial:
                 {
                     TBX_TRACE_VERBOSE("GL RENDERER: Compiling material");
 
@@ -41,12 +41,12 @@ namespace OpenGLRendering
                     SetMaterial(material);
                     break;
                 }
-                case Tbx::DrawCommandType::UploadUniform:
+                case Tbx::DrawCommandType::SetUniform:
                 {
                     TBX_TRACE_VERBOSE("GL RENDERER: Uploading material data");
 
                     const auto& uniform = std::any_cast<const Tbx::ShaderUniform&>(cmd.GetPayload());
-                    UploadShaderUniform(uniform);
+                    SetUniform(uniform);
                     break;
                 }
                 case Tbx::DrawCommandType::UploadMesh:
@@ -191,9 +191,9 @@ namespace OpenGLRendering
         }
     }
 
-    void OpenGLRenderer::UploadShaderUniform(const Tbx::ShaderUniform& data)
+    void OpenGLRenderer::SetUniform(const Tbx::ShaderUniform& data)
     {
         const auto& mat = _materialInstanceCache[_activeMaterial];
-        mat.UploadUniform(data);
+        mat.SetUniform(data);
     }
 }
