@@ -1,14 +1,13 @@
 #pragma once
-#include <Tbx/PluginAPI/RegisterPlugin.h>
+#include <Tbx/Plugins/Plugin.h>
+#include <Tbx/Graphics/IRenderer.h>
 
 namespace OpenGLRendering
 {
-    class OpenGLRendererFactory : public Tbx::IRendererFactoryPlugin
+    class OpenGLRendererFactory : public Tbx::IRendererFactory, public Tbx::Plugin
     {
     public:
-        void OnLoad() override;
-        void OnUnload() override;
-
+        OpenGLRendererFactory(const std::weak_ptr<Tbx::App>& app) {}
         std::shared_ptr<Tbx::IRenderer> Create(std::shared_ptr<Tbx::IRenderSurface> surface) override;
 
     private:
