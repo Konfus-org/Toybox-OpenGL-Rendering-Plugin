@@ -1,8 +1,42 @@
 #include "OpenGLBuffers.h"
-#include "OpenGLMaterial.h"
+#include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 
 namespace OpenGLRendering
 {
+    /// Helpers ///////////////////////////////////////////////////////////
+
+    static GLenum ShaderUniformTypeToOpenGLType(const Tbx::VertexData& type)
+    {
+        if (std::holds_alternative<Tbx::Vector2>(type))
+        {
+            return GL_FLOAT_VEC2;
+        }
+        else if (std::holds_alternative<Tbx::Vector3>(type))
+        {
+            return GL_FLOAT_VEC3;
+        }
+        else if (std::holds_alternative<Tbx::RgbaColor>(type))
+        {
+            return GL_FLOAT_VEC4;
+        }
+        else if (std::holds_alternative<float>(type))
+        {
+            return GL_FLOAT;
+        }
+        else if (std::holds_alternative<int>(type))
+        {
+            return GL_INT;
+        }
+        else
+        {
+            TBX_ASSERT(false, "Could not convert to OpenGL type from vertex data, given unknown data type!");
+            return GL_NONE;
+        }
+
+    }
+
+
     /// Vertex Buffer ///////////////////////////////////////////////////////////
 
     OpenGLVertexBuffer::OpenGLVertexBuffer()
@@ -18,27 +52,25 @@ namespace OpenGLRendering
 
     void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
     {
-        const auto& verticesVec = vertices.GetVertices();
+        const auto& verticesVec = vertices.Vertices;
         _count = (Tbx::uint32)verticesVec.size();
         glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), verticesVec.data(), GL_STATIC_DRAW);
 
         Tbx::uint32 index = 0;
-        const auto& layout = vertices.GetLayout();
-        for (const auto& element : layout)
+        const auto& layout = vertices.Layout;
+        const auto& stride = layout.Stride;
+        for (const auto& element : layout.Elements)
         {
-            const auto& count = element.GetCount();
-            const auto& type = ShaderUniformTypeToOpenGLType(element.GetType());
-            const auto& stride = layout.GetStride();
-            const auto& offset = element.GetOffset();
-            const auto& normalized = element.IsNormalized() ? GL_TRUE : GL_FALSE;
-
-            AddAttribute(index, count, type, stride, offset, normalized);
-
+            const auto& type = ShaderUniformTypeToOpenGLType(element.Type);
+            const auto& size = element.Size;
+            const auto& offset = element.Offset;
+            const auto& normalized = element.Normalized ? GL_TRUE : GL_FALSE;
+            AddAttribute(index, size, type, stride, offset, normalized);
             index++;
         }
     }
 
-    void OpenGLVertexBuffer::AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const
+    void OpenGLVertexBuffer::AddAttribute(Tbx::uint index, Tbx::uint32 size, Tbx::uint32 type, Tbx::uint32 stride, Tbx::uint32 offset, bool normalized) const
     {
         // Need to do this casting nonsense to get rid of a warning...
         const auto* offsetPtr = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(offset));

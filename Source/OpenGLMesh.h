@@ -1,9 +1,8 @@
 #pragma once
 #include "IBindable.h"
 #include "OpenGLBuffers.h"
-#include <Tbx/Graphics/Buffers.h>
-#include <Tbx/TypeAliases/Int.h>
-#include <glad/glad.h>
+#include <Tbx/Graphics/Vertex.h>
+#include <Tbx/Math/Int.h>
 
 namespace OpenGLRendering
 {

@@ -1,6 +1,9 @@
 #include "OpenGLMaterial.h"
 #include <Tbx/Math/Vectors.h>
 #include <Tbx/Math/Mat4x4.h>
+#include <Tbx/Graphics/Color.h>
+#include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 #include <vector>
 
 namespace OpenGLRendering
@@ -71,15 +74,15 @@ namespace OpenGLRendering
     void OpenGLShader::Compile(const Tbx::Shader& shader, Tbx::uint programId)
     {
         _programId = programId;
-        _type = shader.GetType();
+        _type = shader.Type;
 
         // Create a shader handle
         _shaderId;
-        if (shader.GetType() == Tbx::ShaderType::Vertex)
+        if (shader.Type == Tbx::ShaderType::Vertex)
         {
             _shaderId = glCreateShader(GL_VERTEX_SHADER);
         }
-        else if (shader.GetType() == Tbx::ShaderType::Fragment)
+        else if (shader.Type == Tbx::ShaderType::Fragment)
         {
             _shaderId = glCreateShader(GL_FRAGMENT_SHADER);
         }
@@ -90,7 +93,7 @@ namespace OpenGLRendering
 
         // Send the shader source code to GL
         // Note that std::string's .c_str is NULL character terminated.
-        const auto* source = shader.GetSource().c_str();
+        const auto* source = shader.Source.c_str();
         glShaderSource(_shaderId, 1, &source, nullptr);
 
         // Compile the vertex shader
@@ -121,49 +124,33 @@ namespace OpenGLRendering
 
     void OpenGLShader::UploadUniform(const Tbx::ShaderUniform& data) const
     {
-        switch (data.DataType)
+        if (std::holds_alternative<Tbx::Mat4x4>(data.Data))
         {
-            using enum Tbx::ShaderUniformDataType;
-            case None:
-            {
-                TBX_TRACE_WARNING("Attempted to upload NONE uniform type!");
-                break;
-            }
-            case Mat4:
-            {
-                UploadUniformMat4(data.Name, std::any_cast<Tbx::Mat4x4>(data.Data), _programId);
-                break;
-            }
-            case Float:
-            {
-                UploadUniformFloat(data.Name, std::any_cast<float>(data.Data), _programId);
-                break;
-            }
-            case Float2:
-            {
-                UploadUniformFloat2(data.Name, std::any_cast<Tbx::Vector2>(data.Data), _programId);
-                break;
-            }
-            case Float3:
-            {
-                UploadUniformFloat3(data.Name, std::any_cast<Tbx::Vector3>(data.Data), _programId);
-                break;
-            }
-            case Float4:
-            {
-                UploadUniformFloat4(data.Name, std::any_cast<Tbx::RgbaColor>(data.Data), _programId);
-                break;
-            }
-            case Int:
-            {
-                UploadUniformInt(data.Name, std::any_cast<int>(data.Data), _programId);
-                break;
-            }
-            default:
-            {
-                TBX_ASSERT(false, "Unsupported shader data type.");
-                break;
-            }
+            UploadUniformMat4(data.Name, std::get<Tbx::Mat4x4>(data.Data), _programId);
+        }
+        else if (std::holds_alternative<Tbx::Vector2>(data.Data))
+        {
+            UploadUniformFloat2(data.Name, std::get<Tbx::Vector2>(data.Data), _programId);
+        }
+        else if (std::holds_alternative<Tbx::Vector3>(data.Data))
+        {
+            UploadUniformFloat3(data.Name, std::get<Tbx::Vector3>(data.Data), _programId);
+        }
+        else if (std::holds_alternative<Tbx::RgbaColor>(data.Data))
+        {
+            UploadUniformFloat4(data.Name, std::get<Tbx::RgbaColor>(data.Data), _programId);
+        }
+        else if (std::holds_alternative<float>(data.Data))
+        {
+            UploadUniformFloat(data.Name, std::get<float>(data.Data), _programId);
+        }
+        else if (std::holds_alternative<int>(data.Data))
+        {
+            UploadUniformInt(data.Name, std::get<int>(data.Data), _programId);
+        }
+        else
+        {
+            TBX_ASSERT(false, "Unsupported shader data type.");
         }
     }
 
@@ -188,7 +175,7 @@ namespace OpenGLRendering
         // https://www.khronos.org/opengl/wiki/Shader_Compilation:
         {
             // Compile shaders
-            for (const auto& shader : material.GetShaders())
+            for (const auto& shader : material.Shaders)
             {
                 auto& glShader = _shaders.emplace_back();
                 glShader.Compile(shader, _materialGLId);
@@ -250,7 +237,7 @@ namespace OpenGLRendering
     {
         _material.Bind();
         Tbx::uint slot = 0;
-        for (const auto& texture : material.GetTextures())
+        for (const auto& texture : material.Textures)
         {
             auto& glTexture = _textures.emplace_back();
             glTexture.Upload(texture, slot);

@@ -1,4 +1,5 @@
 #include "OpenGLTexture.h"
+#include <Tbx/Debug/Debugging.h>
 
 namespace OpenGLRendering
 {
@@ -12,11 +13,11 @@ namespace OpenGLRendering
 
     int TbxTexFilterToGLTexFilter(const Tbx::Texture& tex)
     {
-        if (tex.GetFilter() == Tbx::TextureFilter::Nearest)
+        if (tex.Filter == Tbx::TextureFilter::Nearest)
         {
             return GL_NEAREST;
         }
-        else if (tex.GetFilter() == Tbx::TextureFilter::Linear)
+        else if (tex.Filter == Tbx::TextureFilter::Linear)
         {
             return GL_LINEAR;
         }
@@ -29,15 +30,15 @@ namespace OpenGLRendering
 
     int TbxTexWrapToGLTexWrap(const Tbx::Texture& tex)
     {
-        if (tex.GetWrap() == Tbx::TextureWrap::Repeat)
+        if (tex.Wrap == Tbx::TextureWrap::Repeat)
         {
             return GL_REPEAT;
         }
-        else if (tex.GetWrap() == Tbx::TextureWrap::MirroredRepeat)
+        else if (tex.Wrap == Tbx::TextureWrap::MirroredRepeat)
         {
             return GL_MIRRORED_REPEAT;
         }
-        else if (tex.GetWrap() == Tbx::TextureWrap::ClampToEdge)
+        else if (tex.Wrap == Tbx::TextureWrap::ClampToEdge)
         {
             return GL_CLAMP_TO_EDGE;
         }
@@ -50,12 +51,12 @@ namespace OpenGLRendering
 
     GlTextureFormat TbxTexFormatToGLTexFormat(const Tbx::Texture& tex)
     {
-        const Tbx::uint32 channelCount = tex.GetChannels();
-        if (channelCount == 4)
+        const auto& format = tex.Format;
+        if (format == Tbx::TextureFormat::RGBA)
         {
             return { GL_RGBA8, GL_RGBA };
         }
-        else if (channelCount == 3)
+        else if (format == Tbx::TextureFormat::RGB)
         {
             return { GL_RGB8, GL_RGB };
         }
@@ -96,7 +97,7 @@ namespace OpenGLRendering
         glTextureParameteri(_textureGLId, GL_TEXTURE_WRAP_T, wrapping);
 
         // Upload texture data to GPU
-        glTexImage2D(GL_TEXTURE_2D, 0, format.InternalFormat, tex.GetWidth(), tex.GetHeight(), 0, format.DataFormat, GL_UNSIGNED_BYTE, tex.GetPixels().data());
+        glTexImage2D(GL_TEXTURE_2D, 0, format.InternalFormat, tex.Size.Width, tex.Size.Height, 0, format.DataFormat, GL_UNSIGNED_BYTE, tex.Pixels.data());
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 

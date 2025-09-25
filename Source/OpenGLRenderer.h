@@ -1,34 +1,26 @@
 #pragma once
-#include "OpenGLContext.h"
 #include "OpenGLMaterial.h"
 #include "OpenGLMesh.h"
 #include <Tbx/Graphics/IRenderer.h>
 #include <Tbx/Graphics/Mesh.h>
 #include <Tbx/Graphics/Material.h>
+#include <Tbx/Graphics/Viewport.h>
 
 namespace OpenGLRendering
 {
-    class OpenGLRenderer : public Tbx::IRenderer
+    class OpenGLRenderer : public Tbx::IOpenGlRenderer
     {
     public:
-        void Initialize(const std::shared_ptr<Tbx::IRenderSurface>& surface) override;
-
-        void Process(const Tbx::FrameBuffer& buffer) override;
+        void Process(const Tbx::RenderCommandBuffer& buffer) override;
 
         void Flush() override;
-        void Clear(const Tbx::RgbaColor& color) override;
+        void Clear(const Tbx::RgbaColor& color);
 
-        void SetApi(Tbx::GraphicsApi api) override;
-        Tbx::GraphicsApi GetApi() override;
+        void SetResolution(const Tbx::Size& size);
+        Tbx::Size GetResolution();
 
-        void SetResolution(const Tbx::Size& size) override;
-        Tbx::Size GetResolution() override;
-
-        void SetViewport(const Tbx::Viewport& viewPort) override;
-        Tbx::Viewport GetViewport() override;
-
-        void SetVSyncEnabled(bool enabled) override;
-        bool GetVSyncEnabled() override;
+        void SetViewport(const Tbx::Viewport& viewPort);
+        Tbx::Viewport GetViewport();
 
     private:
         void FinalizeFrame();
@@ -38,14 +30,12 @@ namespace OpenGLRendering
         void UploadMaterial(const Tbx::MaterialInstance& materialInstance);
         void SetUniform(const Tbx::ShaderUniform& data);
 
-        Tbx::Uid _activeMaterial = Tbx::Consts::Invalid::Uid;
+        Tbx::Uid _activeMaterial = Tbx::Uid::Invalid;
         std::unordered_map<Tbx::Uid, OpenGLMesh> _meshCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterial> _materialCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterialInstance> _materialInstanceCache = {};
         Tbx::Size _resolution = {};
         Tbx::Viewport _viewport = {};
-        OpenGLContext _context = {};
-        bool _vsyncEnabled = false;
     };
 }
 

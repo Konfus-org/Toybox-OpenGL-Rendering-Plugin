@@ -1,8 +1,7 @@
 #pragma once
 #include "IBindable.h"
-#include <Tbx/Graphics/Buffers.h>
-#include <Tbx/TypeAliases/Int.h>
-#include <glad/glad.h>
+#include <Tbx/Graphics/Vertex.h>
+#include <Tbx/Math/Int.h>
 
 namespace OpenGLRendering
 {
@@ -13,7 +12,7 @@ namespace OpenGLRendering
         ~OpenGLVertexBuffer() final;
 
         void Upload(const Tbx::VertexBuffer& vertices);
-        void AddAttribute(const Tbx::uint& index, const Tbx::uint& size, const Tbx::uint& type, const Tbx::uint& stride, const Tbx::uint& offset, const bool& normalized) const;
+        void AddAttribute(Tbx::uint index, Tbx::uint32 size, Tbx::uint32 type, Tbx::uint32 stride, Tbx::uint32 offset, bool normalized) const;
 
         void Bind() const final;
         void Unbind() const final;

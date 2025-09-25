@@ -1,6 +1,7 @@
 #include "OpenGLMesh.h"
 #include "OpenGLBuffers.h"
-#include "OpenGLMaterial.h"
+#include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 
 namespace OpenGLRendering
 {
@@ -16,7 +17,7 @@ namespace OpenGLRendering
 
     void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
     {
-        TBX_ASSERT(buffer.GetLayout().GetElements().size(), "Vertex buffer has no layout... a layout MUST be provided!");
+        TBX_ASSERT(buffer.Layout.Elements.size(), "Vertex buffer has no layout... a layout MUST be provided!");
         _vertexBuffer.Bind();
         _vertexBuffer.Upload(buffer);
     }
