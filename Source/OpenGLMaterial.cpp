@@ -175,10 +175,10 @@ namespace OpenGLRendering
         // https://www.khronos.org/opengl/wiki/Shader_Compilation:
         {
             // Compile shaders
-            for (const auto& shader : material.Shaders)
+            for (const auto shader : material.Shaders)
             {
                 auto& glShader = _shaders.emplace_back();
-                glShader.Compile(shader, _materialGLId);
+                glShader.Compile(*shader, _materialGLId);
             }
 
             // Link our program
@@ -240,7 +240,7 @@ namespace OpenGLRendering
         for (const auto& texture : material.Textures)
         {
             auto& glTexture = _textures.emplace_back();
-            glTexture.Upload(texture, slot);
+            glTexture.Upload(*texture, slot);
             slot++;
         }
         _material.Unbind();

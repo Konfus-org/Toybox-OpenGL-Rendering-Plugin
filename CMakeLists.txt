@@ -23,6 +23,7 @@ set_target_properties(OpenGLRendering PROPERTIES CXX_STANDARD 20 CXX_STANDARD_RE
 target_link_libraries(OpenGLRendering PRIVATE
   Tbx::Engine
   glad
+  SDL3-shared
 )
 
 # Copy plugin meta file to build dir

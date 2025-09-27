@@ -1,14 +1,10 @@
 {
     "name": "OpenGL Rendering",
-    "lib": "OpenGLRendering.dll",
-    "dependencies": [
-        "Windowing"
-    ],
-    "type": [
-        "Renderer Factory"
-    ],
     "language": "C++",
     "version": "0.0.1",
     "author": "Konfus-dev",
-    "description": "Rendering system implemented using the OpenGL API."
+    "description": "Rendering system implemented using the OpenGL API.",
+    "dependencies": [
+        "SDL3 Windowing"
+    ]
 }

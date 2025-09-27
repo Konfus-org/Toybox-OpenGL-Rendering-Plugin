@@ -10,13 +10,15 @@ namespace OpenGLRendering
     {
     public:
         OpenGLRendererFactoryPlugin(const Tbx::WeakRef<Tbx::App>& app) {}
-
         std::shared_ptr<Tbx::IRenderer> Create() override;
-        void OnLoad() override;
 
     private:
+        void InitializeOpenGl();
         Tbx::IRenderer* New();
         void Delete(Tbx::IRenderer* renderer);
+
+    private:
+        bool _isGlInitialized = false;
     };
 
     TBX_REGISTER_PLUGIN(OpenGLRendererFactoryPlugin);

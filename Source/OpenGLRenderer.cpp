@@ -60,6 +60,22 @@ namespace OpenGLRendering
                     DrawMesh(mesh);
                     break;
                 }
+                case Tbx::RenderCommandType::SetResolution:
+                {
+                    TBX_TRACE_VERBOSE("GL RENDERER: Setting resolution");
+
+                    const auto& resolution = std::any_cast<const Tbx::Size&>(cmd.Payload);
+                    SetResolution(resolution);
+                    break;
+                }
+                case Tbx::RenderCommandType::SetViewport:
+                {
+                    TBX_TRACE_VERBOSE("GL RENDERER: Setting viewport");
+
+                    const auto& viewport = std::any_cast<const Tbx::Viewport&>(cmd.Payload);
+                    SetViewport(viewport);
+                    break;
+                }
                 default:
                 {
                     TBX_ASSERT(false, "Unknown draw command type!");
