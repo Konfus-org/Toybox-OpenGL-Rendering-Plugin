@@ -61,7 +61,7 @@ namespace OpenGLRendering
         for (const auto& element : layout.Elements)
         {
             const auto& type = VertexTypeToGlType(element.Type);
-            const auto& size = element.Size;
+            const auto& size = element.Count;
             const auto& offset = element.Offset;
             const auto& normalized = element.Normalized ? GL_TRUE : GL_FALSE;
             AddAttribute(index, size, type, stride, offset, normalized);

@@ -40,27 +40,11 @@ namespace OpenGLRendering
 
     void OpenGLRendererFactoryPlugin::InitializeOpenGl()
     {
-        // Set attribute
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#ifdef TBX_DEBUG
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#endif
-        // Validate attributes
-        int att = 0;
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &att);
-        TBX_ASSERT(att == 4, "Failed to set OpenGL context major version to 4");
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &att);
-        TBX_ASSERT(att == 5, "Failed to set OpenGL context minor version to 5");
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &att);
-        TBX_ASSERT(att == SDL_GL_CONTEXT_PROFILE_CORE, "Failed to set OpenGL context profile to core");
-#ifdef TBX_DEBUG
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &att);
-        TBX_ASSERT(att == SDL_GL_CONTEXT_DEBUG_FLAG, "Failed to set OpenGL context debug flag");
-#endif
+        TBX_TRACE_INFO("Initializing OpenGl...\n");
+
         // Load the OpenGL functions using Glad
         // TODO: Make a sdl gl loader plugin that we use here!
+        SDL_GL_SetSwapInterval(0);
         int gladStatus = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
         TBX_ASSERT(gladStatus, "Failed to initialize Glad!");
 
@@ -76,7 +60,7 @@ namespace OpenGLRendering
         TBX_TRACE_INFO("  Version: {0}", openGLVersion);
 
         // Check OpenGL version
-        TBX_ASSERT(GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 5), "Tbx requires at least OpenGL version 4.5!");
+        TBX_ASSERT((GLVersion.major == 4 && GLVersion.minor >= 5), "Tbx requires at least OpenGL version 4.5!");
 
 #ifdef TBX_DEBUG
         // Enable debug output
