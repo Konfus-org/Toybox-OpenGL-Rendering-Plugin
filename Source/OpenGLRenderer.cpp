@@ -147,8 +147,8 @@ namespace OpenGLRendering
                 std::forward_as_tuple());
             auto& glMesh = _meshCache[meshId];
             glMesh.Bind();
-            glMesh.UploadVertexBuffer(mesh.VertexBuffer);
-            glMesh.UploadIndexBuffer(mesh.IndexBuffer);
+            glMesh.UploadVertexBuffer(mesh.Vertices);
+            glMesh.UploadIndexBuffer(mesh.Indices);
         }
     }
 

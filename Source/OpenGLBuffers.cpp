@@ -6,19 +6,19 @@ namespace OpenGLRendering
 {
     /// Helpers ///////////////////////////////////////////////////////////
 
-    static GLenum ShaderUniformTypeToOpenGLType(const Tbx::VertexData& type)
+    static GLenum VertexTypeToGlType(const Tbx::VertexData& type)
     {
         if (std::holds_alternative<Tbx::Vector2>(type))
         {
-            return GL_FLOAT_VEC2;
+            return GL_FLOAT;
         }
         else if (std::holds_alternative<Tbx::Vector3>(type))
         {
-            return GL_FLOAT_VEC3;
+            return GL_FLOAT;
         }
         else if (std::holds_alternative<Tbx::RgbaColor>(type))
         {
-            return GL_FLOAT_VEC4;
+            return GL_FLOAT;
         }
         else if (std::holds_alternative<float>(type))
         {
@@ -36,7 +36,6 @@ namespace OpenGLRendering
 
     }
 
-
     /// Vertex Buffer ///////////////////////////////////////////////////////////
 
     OpenGLVertexBuffer::OpenGLVertexBuffer()
@@ -50,18 +49,18 @@ namespace OpenGLRendering
         glDeleteBuffers(1, &_vertBufferGLId);
     }
 
-    void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& vertices)
+    void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& buffer)
     {
-        const auto& verticesVec = vertices.Vertices;
+        const auto& verticesVec = buffer.Vertices;
         _count = (Tbx::uint32)verticesVec.size();
         glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), verticesVec.data(), GL_STATIC_DRAW);
 
         Tbx::uint32 index = 0;
-        const auto& layout = vertices.Layout;
+        const auto& layout = buffer.Layout;
         const auto& stride = layout.Stride;
         for (const auto& element : layout.Elements)
         {
-            const auto& type = ShaderUniformTypeToOpenGLType(element.Type);
+            const auto& type = VertexTypeToGlType(element.Type);
             const auto& size = element.Size;
             const auto& offset = element.Offset;
             const auto& normalized = element.Normalized ? GL_TRUE : GL_FALSE;
@@ -95,10 +94,10 @@ namespace OpenGLRendering
         glCreateBuffers(1, &_indexBuffGLId);
     }
 
-    void OpenGLIndexBuffer::Upload(const std::vector<Tbx::uint32>& indices)
+    void OpenGLIndexBuffer::Upload(const Tbx::IndexBuffer& buffer)
     {
-        _count = (Tbx::uint32)indices.size();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), indices.data(), GL_STATIC_DRAW);
+        _count = (Tbx::uint32)buffer.size();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), buffer.data(), GL_STATIC_DRAW);
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()

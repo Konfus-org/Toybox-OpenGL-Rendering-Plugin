@@ -1,6 +1,6 @@
 #pragma once
 #include "IBindable.h"
-#include <Tbx/Graphics/Vertex.h>
+#include <Tbx/Graphics/Mesh.h>
 #include <Tbx/Math/Int.h>
 
 namespace OpenGLRendering
@@ -11,7 +11,7 @@ namespace OpenGLRendering
         OpenGLVertexBuffer();
         ~OpenGLVertexBuffer() final;
 
-        void Upload(const Tbx::VertexBuffer& vertices);
+        void Upload(const Tbx::VertexBuffer& buffer);
         void AddAttribute(Tbx::uint index, Tbx::uint32 size, Tbx::uint32 type, Tbx::uint32 stride, Tbx::uint32 offset, bool normalized) const;
 
         void Bind() const final;
@@ -30,7 +30,7 @@ namespace OpenGLRendering
         OpenGLIndexBuffer();
         ~OpenGLIndexBuffer() final;
 
-        void Upload(const std::vector<Tbx::uint32>& indices);
+        void Upload(const Tbx::IndexBuffer& buffer);
         void Bind() const final;
         void Unbind() const final;
 
