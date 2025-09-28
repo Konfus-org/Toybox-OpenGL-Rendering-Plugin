@@ -1,6 +1,6 @@
 #pragma once
 #include <Tbx/Graphics/Shader.h>
-#include <Tbx/Graphics/GraphicsResource.h>
+#include <Tbx/Graphics/GraphicsResources.h>
 
 namespace Tbx::Plugins::OpenGLRendering
 {

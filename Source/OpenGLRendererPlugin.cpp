@@ -52,11 +52,11 @@ namespace Tbx::Plugins::OpenGLRendering
     {
         glClearColor(clearColor.R, clearColor.G, clearColor.B, clearColor.A);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport((GLint)viewport.Position.X, (GLint)viewport.Position.Y, viewport.Extends.Width, viewport.Extends.Height);
     }
 
     void OpenGLRenderingPlugin::EndDraw()
     {
-        
     }
 
     Ref<TextureResource> OpenGLRenderingPlugin::UploadTexture(const Texture& texture)

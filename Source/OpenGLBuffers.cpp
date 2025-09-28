@@ -93,16 +93,16 @@ namespace Tbx::Plugins::OpenGLRendering
         glCreateBuffers(1, &_indexBuffGLId);
     }
 
-    void OpenGLIndexBuffer::Upload(const IndexBuffer& buffer)
-    {
-        _count = (uint32)buffer.size();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(uint32), buffer.data(), GL_STATIC_DRAW);
-    }
-
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
     {
         Unbind();
         glDeleteBuffers(1, &_indexBuffGLId);
+    }
+
+    void OpenGLIndexBuffer::Upload(const IndexBuffer& buffer)
+    {
+        _count = (uint32)buffer.size();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(uint32), buffer.data(), GL_STATIC_DRAW);
     }
 
     void OpenGLIndexBuffer::Bind() const

@@ -1,7 +1,7 @@
 #pragma once
 #include <Tbx/Plugins/Plugin.h>
 #include <Tbx/Graphics/GraphicsBackend.h>
-#include <Tbx/Graphics/GraphicsResource.h>
+#include <Tbx/Graphics/GraphicsResources.h>
 
 namespace Tbx::Plugins::OpenGLRendering
 {

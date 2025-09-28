@@ -1,7 +1,7 @@
 #pragma once
 #include "OpenGLBuffers.h"
 #include <Tbx/Graphics/Vertex.h>
-#include <Tbx/Graphics/GraphicsResource.h>
+#include <Tbx/Graphics/GraphicsResources.h>
 
 namespace Tbx::Plugins::OpenGLRendering
 {
@@ -14,6 +14,7 @@ namespace Tbx::Plugins::OpenGLRendering
         void Activate() override;
         void Release() override;
 
+        void Draw() override;
         void SetVertexBuffer(const VertexBuffer& buffer) override;
         void SetIndexBuffer(const IndexBuffer& buffer) override;
 

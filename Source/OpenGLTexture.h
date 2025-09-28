@@ -1,5 +1,5 @@
 #pragma once
-#include <Tbx/Graphics/GraphicsResource.h>
+#include <Tbx/Graphics/GraphicsResources.h>
 #include <Tbx/Graphics/Texture.h>
 
 namespace Tbx::Plugins::OpenGLRendering
