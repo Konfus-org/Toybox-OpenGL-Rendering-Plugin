@@ -1,11 +1,12 @@
 #include "OpenGLRendererFactoryPlugin.h"
 #include "OpenGLRenderer.h"
 #include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 #include <SDL3/SDL.h>
 
 namespace OpenGLRendering
 {
-    void GLAPIENTRY GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+    static void GLAPIENTRY GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
     {
         switch (severity)
         {
@@ -40,16 +41,16 @@ namespace OpenGLRendering
 
     void OpenGLRendererFactoryPlugin::InitializeOpenGl()
     {
-        TBX_TRACE_INFO("Initializing OpenGl...\n");
+        TBX_TRACE_INFO("GL Rendering: Initializing OpenGl...\n");
 
         // Load the OpenGL functions using Glad
         // TODO: Make a sdl gl loader plugin that we use here!
         SDL_GL_SetSwapInterval(0);
         int gladStatus = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-        TBX_ASSERT(gladStatus, "Failed to initialize Glad!");
+        TBX_ASSERT(gladStatus, "GL Rendering: Failed to initialize Glad!");
 
         // Print gl info
-        TBX_TRACE_INFO("OpenGL Info:");
+        TBX_TRACE_INFO("GL Rendering: OpenGL Info:");
         const std::string& vendorVersion = (const char*)glGetString(GL_VENDOR);
         TBX_TRACE_INFO("  Vendor: {0}", vendorVersion);
         const std::string& rendererVersion = (const char*)glGetString(GL_RENDERER);
@@ -60,7 +61,7 @@ namespace OpenGLRendering
         TBX_TRACE_INFO("  Version: {0}", openGLVersion);
 
         // Check OpenGL version
-        TBX_ASSERT((GLVersion.major == 4 && GLVersion.minor >= 5), "Tbx requires at least OpenGL version 4.5!");
+        TBX_ASSERT((GLVersion.major == 4 && GLVersion.minor >= 5), "GL Rendering: requires at least OpenGL version 4.5!");
 
 #ifdef TBX_DEBUG
         // Enable debug output

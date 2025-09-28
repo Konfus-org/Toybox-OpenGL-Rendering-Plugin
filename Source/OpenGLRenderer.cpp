@@ -1,5 +1,6 @@
 #include "OpenGLRenderer.h"
 #include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 
 #define TBX_VERBOSE_ENABLED
 
@@ -14,7 +15,7 @@ namespace OpenGLRendering
             {
                 case Tbx::RenderCommandType::Clear:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Clearing color buffer");
+                    TBX_TRACE_VERBOSE("GL Rendering: Clearing color buffer");
 
                     const auto& color = std::any_cast<const Tbx::RgbaColor&>(cmd.Payload);
                     Clear(color);
@@ -22,7 +23,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::UploadMaterial:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Compiling material");
+                    TBX_TRACE_VERBOSE("GL Rendering: Compiling material");
 
                     const auto& material = std::any_cast<const Tbx::MaterialInstance&>(cmd.Payload);
                     UploadMaterial(material);
@@ -30,7 +31,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::SetMaterial:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Setting material");
+                    TBX_TRACE_VERBOSE("GL Rendering: Setting material");
 
                     const auto& material = std::any_cast<const Tbx::MaterialInstance&>(cmd.Payload);
                     SetMaterial(material);
@@ -38,7 +39,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::SetUniform:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Uploading material data");
+                    TBX_TRACE_VERBOSE("GL Rendering: Uploading material data");
 
                     const auto& uniform = std::any_cast<const Tbx::ShaderUniform&>(cmd.Payload);
                     SetUniform(uniform);
@@ -46,7 +47,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::UploadMesh:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Uploading mesh");
+                    TBX_TRACE_VERBOSE("GL Rendering: Uploading mesh");
 
                     const auto& mesh = std::any_cast<const Tbx::Mesh&>(cmd.Payload);
                     UploadMesh(mesh);
@@ -54,7 +55,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::DrawMesh:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Drawing mesh");
+                    TBX_TRACE_VERBOSE("GL Rendering: Drawing mesh");
 
                     const auto& mesh = std::any_cast<const Tbx::Mesh&>(cmd.Payload);
                     DrawMesh(mesh);
@@ -62,7 +63,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::SetResolution:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Setting resolution");
+                    TBX_TRACE_VERBOSE("GL Rendering: Setting resolution");
 
                     const auto& resolution = std::any_cast<const Tbx::Size&>(cmd.Payload);
                     SetResolution(resolution);
@@ -70,7 +71,7 @@ namespace OpenGLRendering
                 }
                 case Tbx::RenderCommandType::SetViewport:
                 {
-                    TBX_TRACE_VERBOSE("GL RENDERER: Setting viewport");
+                    TBX_TRACE_VERBOSE("GL Rendering: Setting viewport");
 
                     const auto& viewport = std::any_cast<const Tbx::Viewport&>(cmd.Payload);
                     SetViewport(viewport);
@@ -78,7 +79,7 @@ namespace OpenGLRendering
                 }
                 default:
                 {
-                    TBX_ASSERT(false, "Unknown draw command type!");
+                    TBX_ASSERT(false, "GL Rendering: Unknown draw command type!");
                     break;
                 }
             }

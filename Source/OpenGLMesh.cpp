@@ -17,7 +17,7 @@ namespace OpenGLRendering
 
     void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
     {
-        TBX_ASSERT(buffer.Layout.Elements.size(), "Vertex buffer has no layout... a layout MUST be provided!");
+        TBX_ASSERT(buffer.Layout.Elements.size(), "GL Rendering: Vertex buffer has no layout... a layout MUST be provided!");
         _vertexBuffer.Bind();
         _vertexBuffer.Upload(buffer);
     }

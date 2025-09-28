@@ -88,7 +88,7 @@ namespace OpenGLRendering
         }
         else
         {
-            TBX_ASSERT(false, "Unsupported shader type.");
+            TBX_ASSERT(false, "GL Rendering: Unsupported shader type.");
         }
 
         // Send the shader source code to GL
@@ -114,7 +114,7 @@ namespace OpenGLRendering
 
             // Assert
             const auto& error = std::string(infoLog.data());
-            TBX_ASSERT(false, "Shader compilation failure: {}", error);
+            TBX_ASSERT(false, "GL Rendering: Shader compilation failure: {}", error);
             return;
         }
 
@@ -150,7 +150,7 @@ namespace OpenGLRendering
         }
         else
         {
-            TBX_ASSERT(false, "Unsupported shader data type.");
+            TBX_ASSERT(false, "GL Rendering: Unsupported shader data type.");
         }
     }
 
@@ -175,7 +175,7 @@ namespace OpenGLRendering
         // https://www.khronos.org/opengl/wiki/Shader_Compilation:
         {
             // Compile shaders
-            for (const auto shader : material.Shaders)
+            for (const auto& shader : material.Shaders)
             {
                 auto& glShader = _shaders.emplace_back();
                 glShader.Compile(*shader, _materialGLId);
@@ -201,7 +201,7 @@ namespace OpenGLRendering
 
                 // Assert
                 const auto& error = std::string(infoLog.data());
-                TBX_ASSERT(false, "Shader link failure: {0}", error);
+                TBX_ASSERT(false, "GL Rendering: Shader link failure: {0}", error);
                 return;
             }
 

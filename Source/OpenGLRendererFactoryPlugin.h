@@ -4,12 +4,13 @@
 
 namespace OpenGLRendering
 {
-    class OpenGLRendererFactoryPlugin
+    class OpenGLRendererFactoryPlugin final
         : public Tbx::Plugin
         , public Tbx::IRendererFactory
     {
     public:
-        OpenGLRendererFactoryPlugin(const Tbx::WeakRef<Tbx::App>& app) {}
+        OpenGLRendererFactoryPlugin(Tbx::WeakRef<Tbx::App> app)
+            : Tbx::Plugin(app) {}
         std::shared_ptr<Tbx::IRenderer> Create() override;
 
     private:

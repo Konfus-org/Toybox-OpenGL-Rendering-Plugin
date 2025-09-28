@@ -6,14 +6,14 @@
 
 namespace OpenGLRendering
 {
-    class OpenGLMesh : public IBindable
+    class OpenGLMesh final : public IBindable
     {
     public:
         OpenGLMesh();
-        ~OpenGLMesh() final;
+        ~OpenGLMesh() override;
 
-        void Bind() const final;
-        void Unbind() const final;
+        void Bind() const override;
+        void Unbind() const override;
 
         void UploadVertexBuffer(const Tbx::VertexBuffer& buffer);
         void UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer);

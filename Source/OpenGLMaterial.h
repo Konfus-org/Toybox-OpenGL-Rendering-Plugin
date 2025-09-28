@@ -19,25 +19,26 @@ namespace OpenGLRendering
         Tbx::ShaderType _type = Tbx::ShaderType::None;
     };
 
-    class OpenGLMaterial : public IBindable
+    class OpenGLMaterial final : public IBindable
     {
     public:
         OpenGLMaterial() = default;
-        ~OpenGLMaterial() final;
+        ~OpenGLMaterial() override;
+
+        void Bind() const override;
+        void Unbind() const override;
 
         void Upload(const Tbx::Material& material);
         void UploadUniform(const Tbx::ShaderUniform& data) const;
-        void Bind() const final;
-        void Unbind() const final;
 
     private:
         Tbx::uint _materialGLId = -1;
         std::vector<OpenGLShader> _shaders = {};
     };
 
-    static OpenGLMaterial DefaultMaterial = {};
+    static const OpenGLMaterial& DefaultMaterial = {};
 
-    class OpenGLMaterialInstance : public IBindable
+    class OpenGLMaterialInstance final : public IBindable
     {
     public:
         OpenGLMaterialInstance()
@@ -45,10 +46,11 @@ namespace OpenGLRendering
         OpenGLMaterialInstance(const OpenGLMaterial& material)
             : _material(material) {}
 
+        void Bind() const override;
+        void Unbind() const override;
+
         void Upload(const Tbx::MaterialInstance& material);
         void SetUniform(const Tbx::ShaderUniform& data) const;
-        void Bind() const final;
-        void Unbind() const final;
 
     private:
         const OpenGLMaterial& _material;

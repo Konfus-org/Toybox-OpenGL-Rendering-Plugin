@@ -30,7 +30,7 @@ namespace OpenGLRendering
         }
         else
         {
-            TBX_ASSERT(false, "Could not convert to OpenGL type from vertex data, given unknown data type!");
+            TBX_ASSERT(false, "GL Rendering: Could not convert to OpenGL type from vertex data, given unknown data type!");
             return GL_NONE;
         }
 

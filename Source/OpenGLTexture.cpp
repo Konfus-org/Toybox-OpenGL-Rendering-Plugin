@@ -1,5 +1,6 @@
 #include "OpenGLTexture.h"
 #include <Tbx/Debug/Debugging.h>
+#include <glad/glad.h>
 
 namespace OpenGLRendering
 {

@@ -1,19 +1,19 @@
 #pragma once
 #include "IBindable.h"
 #include <Tbx/Graphics/Texture.h>
-#include <glad/glad.h>
 
 namespace OpenGLRendering
 {
-    class OpenGLTexture : public IBindable
+    class OpenGLTexture final : public IBindable
     {
     public:
         OpenGLTexture();
-        ~OpenGLTexture() final;
+        ~OpenGLTexture() override;
+
+        void Bind() const override;
+        void Unbind() const override;
 
         void Upload(const Tbx::Texture& tex, const Tbx::uint& slot);
-        void Bind() const final;
-        void Unbind() const final;
 
     private:
         Tbx::uint _slot = 0;
