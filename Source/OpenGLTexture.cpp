@@ -98,7 +98,7 @@ namespace OpenGLRendering
         glTextureParameteri(_textureGLId, GL_TEXTURE_WRAP_T, wrapping);
 
         // Upload texture data to GPU
-        glTexImage2D(GL_TEXTURE_2D, 0, format.InternalFormat, tex.Size.Width, tex.Size.Height, 0, format.DataFormat, GL_UNSIGNED_BYTE, tex.Pixels.data());
+        glTexImage2D(GL_TEXTURE_2D, 0, format.InternalFormat, tex.Resolution.Width, tex.Resolution.Height, 0, format.DataFormat, GL_UNSIGNED_BYTE, tex.Pixels.data());
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
