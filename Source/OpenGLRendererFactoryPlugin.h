@@ -5,12 +5,11 @@
 namespace OpenGLRendering
 {
     class OpenGLRendererFactoryPlugin final
-        : public Tbx::Plugin
+        : public Tbx::IPlugin
         , public Tbx::IRendererFactory
     {
     public:
-        OpenGLRendererFactoryPlugin(Tbx::WeakRef<Tbx::App> app)
-            : Tbx::Plugin(app) {}
+        OpenGLRendererFactoryPlugin(Tbx::Ref<Tbx::EventBus> eventBus) {}
         std::shared_ptr<Tbx::IRenderer> Create() override;
 
     private:
