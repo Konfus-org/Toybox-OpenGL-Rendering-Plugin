@@ -58,7 +58,7 @@ namespace OpenGLRendering
         const std::string& glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
         TBX_TRACE_INFO("  GLSL: {0}", glslVersion);
         const std::string& openGLVersion = (const char*)glGetString(GL_VERSION);
-        TBX_TRACE_INFO("  Version: {0}", openGLVersion);
+        TBX_TRACE_INFO("  Version: {0}\n", openGLVersion);
 
         // Check OpenGL version
         TBX_ASSERT((GLVersion.major == 4 && GLVersion.minor >= 5), "GL Rendering: requires at least OpenGL version 4.5!");
