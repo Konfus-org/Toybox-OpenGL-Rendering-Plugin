@@ -162,14 +162,14 @@ namespace OpenGLRendering
 
     void OpenGLRenderer::UploadMaterial(const Tbx::MaterialInstance& materialInstance)
     {
-        const auto& materialId = materialInstance.Material->Id;
+        const auto& materialId = materialInstance.InstanceOf->Id;
         if (!_materialCache.contains(materialId))
         {
             _materialCache.emplace(
                 std::piecewise_construct,
                 std::forward_as_tuple(materialId),
                 std::forward_as_tuple());
-            _materialCache[materialId].Upload(*materialInstance.Material);
+            _materialCache[materialId].Upload(*materialInstance.InstanceOf);
         }
 
         const auto& materialInstanceId = materialInstance.Id;
