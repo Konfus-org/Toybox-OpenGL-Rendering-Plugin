@@ -10,12 +10,12 @@ namespace OpenGLRendering
     {
     public:
         OpenGLRendererFactoryPlugin(Tbx::Ref<Tbx::EventBus> eventBus) {}
-        std::shared_ptr<Tbx::IRenderer> Create() override;
+        std::vector<Tbx::GraphicsApi> GetSupportedApis() const override;
+        Tbx::Ref<Tbx::IRenderer> Create(Tbx::Ref<Tbx::IGraphicsContext> context) override;
 
     private:
-        void InitializeOpenGl();
-        Tbx::IRenderer* New();
-        void Delete(Tbx::IRenderer* renderer);
+        void InitializeOpenGl(Tbx::Ref<Tbx::IGraphicsContext> context);
+        void DeleteRenderer(Tbx::IRenderer* renderer);
 
     private:
         bool _isGlInitialized = false;

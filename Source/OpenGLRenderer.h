@@ -8,7 +8,7 @@
 
 namespace OpenGLRendering
 {
-    class OpenGLRenderer : public Tbx::IOpenGlRenderer
+    class OpenGLRenderer : public Tbx::IRenderer
     {
     public:
         void Process(const Tbx::RenderCommandBuffer& buffer) override;
@@ -21,6 +21,11 @@ namespace OpenGLRendering
 
         void SetViewport(const Tbx::Viewport& viewPort);
         Tbx::Viewport GetViewport();
+
+        Tbx::GraphicsApi GetApi() const override
+        {
+            return Tbx::GraphicsApi::OpenGL;
+        }
 
     private:
         void FinalizeFrame();
