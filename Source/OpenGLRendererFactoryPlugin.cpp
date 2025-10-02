@@ -10,43 +10,53 @@ namespace OpenGLRendering
     {
         switch (severity)
         {
-        case GL_DEBUG_SEVERITY_HIGH:
-            TBX_ASSERT(false, "GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
-            break;
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            TBX_TRACE_ERROR("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            TBX_TRACE_INFO("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
-            break;
-        default:
-            TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", severity, message);
-            break;
+            case GL_DEBUG_SEVERITY_HIGH:
+                TBX_ASSERT(false, "GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                TBX_TRACE_ERROR("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_LOW:
+                TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            case GL_DEBUG_SEVERITY_NOTIFICATION:
+                TBX_TRACE_INFO("GL CALLBACK: type = {}, severity = {}, message = {}\n", type, severity, message);
+                break;
+            default:
+                TBX_TRACE_WARNING("GL CALLBACK: type = {}, severity = {}, message = {}\n", severity, message);
+                break;
         }
     }
 
-    std::shared_ptr<Tbx::IRenderer> OpenGLRendererFactoryPlugin::Create()
+    std::vector<Tbx::GraphicsApi> OpenGLRendererFactoryPlugin::GetSupportedApis() const
     {
+        return { Tbx::GraphicsApi::OpenGL };
+    }
+
+    Tbx::Ref<Tbx::IRenderer> OpenGLRendererFactoryPlugin::Create(Tbx::Ref<Tbx::IGraphicsContext> context)
+    {
+        if (context->GetApi() != Tbx::GraphicsApi::OpenGL)
+        {
+            TBX_ASSERT(false, "GL Rendering: Only open gl is supported by this plugin!");
+            return nullptr;
+        }
+
         if (!_isGlInitialized)
         {
-            InitializeOpenGl();
+            InitializeOpenGl(context);
         }
 
-        auto renderer = std::shared_ptr<Tbx::IRenderer>(New(), [this](Tbx::IRenderer* renderer) { Delete(renderer); });
-        return renderer;
+        return Tbx::Ref<Tbx::IRenderer>(
+            (Tbx::IRenderer*)new OpenGLRenderer(),
+            [this](Tbx::IRenderer* renderer) { DeleteRenderer(renderer); });
     }
 
-    void OpenGLRendererFactoryPlugin::InitializeOpenGl()
+    void OpenGLRendererFactoryPlugin::InitializeOpenGl(Tbx::Ref<Tbx::IGraphicsContext> context)
     {
         TBX_TRACE_INFO("GL Rendering: Initializing OpenGl...\n");
 
         // Load the OpenGL functions using Glad
-        // TODO: Make a sdl gl loader plugin that we use here!
-        SDL_GL_SetSwapInterval(0);
-        int gladStatus = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+        int gladStatus = gladLoadGLLoader((GLADloadproc)context->GetProcAddressLoader());
         TBX_ASSERT(gladStatus, "GL Rendering: Failed to initialize Glad!");
 
         // Print gl info
@@ -86,13 +96,7 @@ namespace OpenGLRendering
         _isGlInitialized = true;
     }
 
-    Tbx::IRenderer* OpenGLRendererFactoryPlugin::New()
-    {
-        auto* renderer = new OpenGLRenderer();
-        return renderer;
-    }
-
-    void OpenGLRendererFactoryPlugin::Delete(Tbx::IRenderer* renderer)
+    void OpenGLRendererFactoryPlugin::DeleteRenderer(Tbx::IRenderer* renderer)
     {
         delete renderer;
     }
