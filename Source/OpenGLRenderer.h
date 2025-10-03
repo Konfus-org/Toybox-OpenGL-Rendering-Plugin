@@ -36,6 +36,7 @@ namespace OpenGLRendering
         void SetUniform(const Tbx::ShaderUniform& data);
 
         Tbx::Uid _activeMaterial = Tbx::Uid::Invalid;
+        Tbx::Uid _activeMesh = Tbx::Uid::Invalid;
         std::unordered_map<Tbx::Uid, OpenGLMesh> _meshCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterial> _materialCache = {};
         std::unordered_map<Tbx::Uid, OpenGLMaterialInstance> _materialInstanceCache = {};

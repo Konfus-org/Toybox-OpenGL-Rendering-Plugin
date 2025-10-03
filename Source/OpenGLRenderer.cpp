@@ -93,6 +93,8 @@ namespace OpenGLRendering
         _meshCache.clear();
         _materialInstanceCache.clear();
         _materialCache.clear();
+        _activeMaterial = Tbx::Uid::Invalid;
+        _activeMesh = Tbx::Uid::Invalid;
         Clear(Tbx::RgbaColor::Black);
     }
 
@@ -125,14 +127,36 @@ namespace OpenGLRendering
 
     void OpenGLRenderer::FinalizeFrame()
     {
-        _materialInstanceCache[_activeMaterial].Unbind();
+        if (_activeMaterial != Tbx::Uid::Invalid)
+        {
+            const auto materialIt = _materialInstanceCache.find(_activeMaterial);
+            if (materialIt != _materialInstanceCache.end())
+            {
+                materialIt->second.Unbind();
+            }
+            _activeMaterial = Tbx::Uid::Invalid;
+        }
+
+        _activeMesh = Tbx::Uid::Invalid;
     }
 
     void OpenGLRenderer::DrawMesh(const Tbx::Mesh& mesh)
     {
         const auto& meshId = mesh.Id;
-        auto& glMesh = _meshCache[meshId];
-        glMesh.Bind();
+        const auto meshIt = _meshCache.find(meshId);
+        TBX_ASSERT(meshIt != _meshCache.end(), "GL Rendering: Attempted to draw a mesh that has not been uploaded!");
+        if (meshIt == _meshCache.end())
+        {
+            return;
+        }
+
+        auto& glMesh = meshIt->second;
+        if (_activeMesh != meshId)
+        {
+            glMesh.Bind();
+            _activeMesh = meshId;
+        }
+
         glDrawElements(GL_TRIANGLES, glMesh.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, 0);
     }
 
@@ -140,52 +164,89 @@ namespace OpenGLRendering
     {
         // TODO: Implement mesh instancing
         const auto& meshId = mesh.Id;
-        if (!_meshCache.contains(meshId))
+        auto [meshIt, inserted] = _meshCache.try_emplace(meshId);
+        if (!inserted)
         {
-            _meshCache.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(meshId),
-                std::forward_as_tuple());
-            auto& glMesh = _meshCache[meshId];
-            glMesh.Bind();
-            glMesh.UploadVertexBuffer(mesh.Vertices);
-            glMesh.UploadIndexBuffer(mesh.Indices);
+            return;
         }
+
+        auto& glMesh = meshIt->second;
+        glMesh.Bind();
+        glMesh.UploadVertexBuffer(mesh.Vertices);
+        glMesh.UploadIndexBuffer(mesh.Indices);
+
+        // Uploading the mesh binds its VAO which dirties the cached active mesh.
+        // Force the next draw call to explicitly rebind whichever mesh it needs.
+        _activeMesh = Tbx::Uid::Invalid;
     }
 
     void OpenGLRenderer::SetMaterial(const Tbx::MaterialInstance& mat)
     {
-        _materialInstanceCache[_activeMaterial].Unbind();
-        _activeMaterial = mat.Id;
-        _materialInstanceCache[_activeMaterial].Bind();
+        const auto& materialInstanceId = mat.Id;
+        if (_activeMaterial == materialInstanceId)
+        {
+            return;
+        }
+
+        if (_activeMaterial != Tbx::Uid::Invalid)
+        {
+            const auto previousIt = _materialInstanceCache.find(_activeMaterial);
+            if (previousIt != _materialInstanceCache.end())
+            {
+                previousIt->second.Unbind();
+            }
+        }
+
+        const auto materialIt = _materialInstanceCache.find(materialInstanceId);
+        TBX_ASSERT(materialIt != _materialInstanceCache.end(), "GL Rendering: Attempted to set an unknown material instance!");
+        if (materialIt == _materialInstanceCache.end())
+        {
+            _activeMaterial = Tbx::Uid::Invalid;
+            return;
+        }
+
+        materialIt->second.Bind();
+        _activeMaterial = materialInstanceId;
     }
 
     void OpenGLRenderer::UploadMaterial(const Tbx::MaterialInstance& materialInstance)
     {
         const auto& materialId = materialInstance.InstanceOf->Id;
-        if (!_materialCache.contains(materialId))
+        auto [materialIt, materialInserted] = _materialCache.try_emplace(materialId);
+        if (materialInserted)
         {
-            _materialCache.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(materialId),
-                std::forward_as_tuple());
-            _materialCache[materialId].Upload(*materialInstance.InstanceOf);
+            materialIt->second.Upload(*materialInstance.InstanceOf);
         }
 
         const auto& materialInstanceId = materialInstance.Id;
-        if (!_materialInstanceCache.contains(materialInstanceId))
+        auto [materialInstanceIt, materialInstanceInserted] =
+            _materialInstanceCache.try_emplace(materialInstanceId, materialIt->second);
+        if (materialInstanceInserted)
         {
-            _materialInstanceCache.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(materialInstanceId),
-                std::forward_as_tuple(_materialCache[materialId]));
-            _materialInstanceCache[materialInstanceId].Upload(materialInstance);
+            materialInstanceIt->second.Upload(materialInstance);
+
+            // Uploading the material instance binds and unbinds the shader program.
+            // This leaves GL without an active program, so invalidate the cached
+            // material to force the next SetMaterial call to rebind the state.
+            _activeMaterial = Tbx::Uid::Invalid;
         }
     }
 
     void OpenGLRenderer::SetUniform(const Tbx::ShaderUniform& data)
     {
-        const auto& mat = _materialInstanceCache[_activeMaterial];
-        mat.SetUniform(data);
+        if (_activeMaterial == Tbx::Uid::Invalid)
+        {
+            TBX_ASSERT(false, "GL Rendering: Attempted to set a uniform without an active material instance!");
+            return;
+        }
+
+        const auto materialIt = _materialInstanceCache.find(_activeMaterial);
+        TBX_ASSERT(materialIt != _materialInstanceCache.end(), "GL Rendering: Attempted to set a uniform on an unknown material instance!");
+        if (materialIt == _materialInstanceCache.end())
+        {
+            return;
+        }
+
+        materialIt->second.SetUniform(data);
     }
 }
