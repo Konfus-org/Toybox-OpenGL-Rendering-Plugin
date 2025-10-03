@@ -174,6 +174,10 @@ namespace OpenGLRendering
         glMesh.Bind();
         glMesh.UploadVertexBuffer(mesh.Vertices);
         glMesh.UploadIndexBuffer(mesh.Indices);
+
+        // Uploading the mesh binds its VAO which dirties the cached active mesh.
+        // Force the next draw call to explicitly rebind whichever mesh it needs.
+        _activeMesh = Tbx::Uid::Invalid;
     }
 
     void OpenGLRenderer::SetMaterial(const Tbx::MaterialInstance& mat)
