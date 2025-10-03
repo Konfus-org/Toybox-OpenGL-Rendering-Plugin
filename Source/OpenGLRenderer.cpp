@@ -224,6 +224,11 @@ namespace OpenGLRendering
         if (materialInstanceInserted)
         {
             materialInstanceIt->second.Upload(materialInstance);
+
+            // Uploading the material instance binds and unbinds the shader program.
+            // This leaves GL without an active program, so invalidate the cached
+            // material to force the next SetMaterial call to rebind the state.
+            _activeMaterial = Tbx::Uid::Invalid;
         }
     }
 
