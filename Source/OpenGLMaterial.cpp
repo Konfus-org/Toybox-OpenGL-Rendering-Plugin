@@ -2,7 +2,7 @@
 #include <Tbx/Math/Vectors.h>
 #include <Tbx/Math/Mat4x4.h>
 #include <Tbx/Graphics/Color.h>
-#include <Tbx/Debug/Debugging.h>
+#include <Tbx/Debug/Asserts.h>
 #include <glad/glad.h>
 #include <vector>
 
@@ -71,7 +71,7 @@ namespace OpenGLRendering
         glDeleteShader(_shaderId);
     }
 
-    void OpenGLShader::Compile(const Tbx::Shader& shader, Tbx::uint programId)
+    void OpenGLShader::Attach(const Tbx::Shader& shader, Tbx::uint programId)
     {
         _programId = programId;
         _type = shader.Type;
@@ -171,14 +171,12 @@ namespace OpenGLRendering
     {
         _materialGLId = glCreateProgram();
 
-        // The code below is a lighty modified version of the example code found here:
-        // https://www.khronos.org/opengl/wiki/Shader_Compilation:
         {
             // Compile shaders
             for (const auto& shader : material.Shaders)
             {
                 auto& glShader = _shaders.emplace_back();
-                glShader.Compile(*shader, _materialGLId);
+                glShader.Attach(*shader, _materialGLId);
             }
 
             // Link our program

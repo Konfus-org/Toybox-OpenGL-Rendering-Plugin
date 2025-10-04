@@ -9,7 +9,7 @@ namespace OpenGLRendering
     {
     public:
         ~OpenGLShader();
-        void Compile(const Tbx::Shader& shader, Tbx::uint programId);
+        void Attach(const Tbx::Shader& shader, Tbx::uint programId);
         void UploadUniform(const Tbx::ShaderUniform& data) const;
         void Detach() const;
 

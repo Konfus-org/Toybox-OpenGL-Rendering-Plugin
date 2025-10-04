@@ -1,6 +1,6 @@
 #include "OpenGLRendererFactoryPlugin.h"
 #include "OpenGLRenderer.h"
-#include <Tbx/Debug/Debugging.h>
+#include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
 

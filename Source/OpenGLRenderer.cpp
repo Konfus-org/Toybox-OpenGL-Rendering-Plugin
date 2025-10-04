@@ -1,12 +1,12 @@
 #include "OpenGLRenderer.h"
-#include <Tbx/Debug/Debugging.h>
+#include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
 
 #define TBX_VERBOSE_ENABLED
 
 namespace OpenGLRendering
 {
-    void OpenGLRenderer::Process(const Tbx::RenderCommandBuffer& buffer)
+    void OpenGLRenderer::Process(const Tbx::DrawCommandBuffer& buffer)
     {
         // Process all draw commands in frame buffer
         for (const auto& cmd : buffer.Commands)
@@ -25,7 +25,7 @@ namespace OpenGLRendering
                 {
                     TBX_TRACE_VERBOSE("GL Rendering: Compiling material");
 
-                    const auto& material = std::any_cast<const Tbx::MaterialInstance&>(cmd.Payload);
+                    const auto& material = cmd.Payload.As<Tbx::MaterialInstance>();
                     UploadMaterial(material);
                     break;
                 }

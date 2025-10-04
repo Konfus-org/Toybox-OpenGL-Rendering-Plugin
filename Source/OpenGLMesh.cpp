@@ -1,6 +1,6 @@
 #include "OpenGLMesh.h"
 #include "OpenGLBuffers.h"
-#include <Tbx/Debug/Debugging.h>
+#include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
 
 namespace OpenGLRendering

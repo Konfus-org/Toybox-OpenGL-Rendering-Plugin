@@ -11,7 +11,7 @@ namespace OpenGLRendering
     class OpenGLRenderer : public Tbx::IRenderer
     {
     public:
-        void Process(const Tbx::RenderCommandBuffer& buffer) override;
+        void Process(const Tbx::DrawCommandBuffer& buffer) override;
 
         void Flush() override;
         void Clear(const Tbx::RgbaColor& color);

@@ -5,7 +5,7 @@
 namespace OpenGLRendering
 {
     class OpenGLRendererFactoryPlugin final
-        : public Tbx::IPlugin
+        : public Tbx::Plugin
         , public Tbx::IRendererFactory
     {
     public:
