@@ -1,10 +1,11 @@
-#include "OpenGLRendererFactoryPlugin.h"
-#include "OpenGLRenderer.h"
+#include "OpenGLRenderingPlugin.h"
+#include "OpenGLShader.h"
+#include "OpenGLMesh.h"
+#include "OpenGLTexture.h"
 #include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
-#include <SDL3/SDL.h>
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
     static void GLAPIENTRY GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
     {
@@ -28,36 +29,59 @@ namespace OpenGLRendering
         }
     }
 
-    std::vector<Tbx::GraphicsApi> OpenGLRendererFactoryPlugin::GetSupportedApis() const
+    void OpenGLRenderingPlugin::DeleteResource(GraphicsResource* resourceToDelete)
     {
-        return { Tbx::GraphicsApi::OpenGL };
+        delete resourceToDelete;
     }
 
-    Tbx::Ref<Tbx::IRenderer> OpenGLRendererFactoryPlugin::Create(Tbx::Ref<Tbx::IGraphicsContext> context)
+    GraphicsApi OpenGLRenderingPlugin::GetApi() const
     {
-        if (context->GetApi() != Tbx::GraphicsApi::OpenGL)
-        {
-            TBX_ASSERT(false, "GL Rendering: Only open gl is supported by this plugin!");
-            return nullptr;
-        }
+        return GraphicsApi::OpenGL;
+    }
 
+    void OpenGLRenderingPlugin::SetContext(Ref<IGraphicsContext> context)
+    {
         if (!_isGlInitialized)
         {
             InitializeOpenGl(context);
         }
-
-        return Tbx::Ref<Tbx::IRenderer>(
-            (Tbx::IRenderer*)new OpenGLRenderer(),
-            [this](Tbx::IRenderer* renderer) { DeleteRenderer(renderer); });
+        _context = context;
     }
 
-    void OpenGLRendererFactoryPlugin::InitializeOpenGl(Tbx::Ref<Tbx::IGraphicsContext> context)
+    void OpenGLRenderingPlugin::BeginDraw(const RgbaColor& clearColor, const Viewport& viewport)
+    {
+        glClearColor(clearColor.R, clearColor.G, clearColor.B, clearColor.A);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void OpenGLRenderingPlugin::EndDraw()
+    {
+        
+    }
+
+    Ref<TextureResource> OpenGLRenderingPlugin::UploadTexture(const Texture& texture)
+    {
+        return Ref<TextureResource>(new OpenGLTexture(texture), [this](TextureResource* resource) { DeleteResource(resource); });
+    }
+
+    Ref<MeshResource> OpenGLRenderingPlugin::UploadMesh(const Mesh& mesh)
+    {
+        return Ref<MeshResource>(new OpenGLMesh(mesh), [this](MeshResource* resource) { DeleteResource(resource); });
+    }
+
+    Ref<ShaderProgramResource> OpenGLRenderingPlugin::CreateShaderProgram(const std::vector<Ref<ShaderResource>>& shadersToLink)
+    {
+        return Ref<ShaderProgramResource>(new OpenGLShaderProgram(shadersToLink), [this](ShaderProgramResource* resource) { DeleteResource(resource); });
+    }
+
+    Ref<ShaderResource> OpenGLRenderingPlugin::CompileShader(const Shader& shader)
+    {
+        return Ref<OpenGLShader>(new OpenGLShader(shader), [this](OpenGLShader* resource) { DeleteResource(resource); });
+    }
+
+    void OpenGLRenderingPlugin::InitializeOpenGl(Ref<IGraphicsContext> context)
     {
         TBX_TRACE_INFO("GL Rendering: Initializing OpenGl...\n");
-
-        // Load the OpenGL functions using Glad
-        int gladStatus = gladLoadGLLoader((GLADloadproc)context->GetProcAddressLoader());
-        TBX_ASSERT(gladStatus, "GL Rendering: Failed to initialize Glad!");
 
         // Print gl info
         TBX_TRACE_INFO("GL Rendering: OpenGL Info:");
@@ -94,10 +118,5 @@ namespace OpenGLRendering
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         _isGlInitialized = true;
-    }
-
-    void OpenGLRendererFactoryPlugin::DeleteRenderer(Tbx::IRenderer* renderer)
-    {
-        delete renderer;
     }
 }

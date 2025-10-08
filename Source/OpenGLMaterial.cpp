@@ -5,86 +5,79 @@
 #include <Tbx/Debug/Asserts.h>
 #include <glad/glad.h>
 #include <vector>
+#include "OpenGLShader.h"
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
     ///// Helpers //////////////////////////////////////////////////////////////////
-    static Tbx::uint GetUniformLocation(const std::string name, Tbx::uint programId)
+    static uint GetUniformLocation(const std::string name, uint programId)
     {
         GLint location = glGetUniformLocation(programId, name.c_str());
         //TBX_ASSERT(location != -1, "Invalid uniform location: {}", name);
         return location;
     }
 
-    static void UploadUniformInt(const std::string& name, int value, Tbx::uint programId)
+    static void UploadUniformInt(const std::string& name, int value, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform1i(location, value);
     }
 
-    static void UploadUniformIntArray(const std::string& name, std::vector<int> values, Tbx::uint programId)
+    static void UploadUniformIntArray(const std::string& name, std::vector<int> values, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
-        glUniform1iv(location, (Tbx::uint32)values.size(), values.data());
+        glUniform1iv(location, (uint32)values.size(), values.data());
     }
 
-    static void UploadUniformFloat(const std::string& name, float value, Tbx::uint programId)
+    static void UploadUniformFloat(const std::string& name, float value, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform1f(location, value);
     }
 
-    static void UploadUniformFloat2(const std::string& name, const Tbx::Vector2& value, Tbx::uint programId)
+    static void UploadUniformFloat2(const std::string& name, const Vector2& value, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform2f(location, value.X, value.Y);
     }
 
-    static void UploadUniformFloat3(const std::string& name, const Tbx::Vector3& value, Tbx::uint programId)
+    static void UploadUniformFloat3(const std::string& name, const Vector3& value, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform3f(location, value.X, value.Y, value.Z);
     }
 
-    static void UploadUniformFloat4(const std::string& name, const Tbx::RgbaColor& value, Tbx::uint programId)
+    static void UploadUniformFloat4(const std::string& name, const RgbaColor& value, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniform4f(location, value.R, value.G, value.B, value.A);
     }
 
     // TODO: Implement when needed... Toybox doesn't have a mat3 yet...
-    ////static void UploadUniformMat3(const std::string& name, const Tbx::Matrix& matrix, Tbx::uint rendererId)
+    ////static void UploadUniformMat3(const std::string& name, const Matrix& matrix, uint rendererId)
     ////{
     ////	GLint location = glGetUniformLocation(rendererId, name.c_str());
     ////	glUniformMatrix3fv(location, 1, GL_FALSE, matrix.Values.data());
     ////}
 
-    static void UploadUniformMat4(const std::string& name, const Tbx::Mat4x4& matrix, Tbx::uint programId)
+    static void UploadUniformMat4(const std::string& name, const Mat4x4& matrix, uint programId)
     {
         GLint location = GetUniformLocation(name.c_str(), programId);
         glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Values.data());
     }
 
-    ///// Shader //////////////////////////////////////////////////////////////////
-    OpenGLShader::~OpenGLShader()
+    OpenGLShader::OpenGLShader(const Shader& shader)
     {
-        glDeleteShader(_shaderId);
-    }
-
-    void OpenGLShader::Attach(const Tbx::Shader& shader, Tbx::uint programId)
-    {
-        _programId = programId;
         _type = shader.Type;
 
         // Create a shader handle
-        _shaderId;
-        if (shader.Type == Tbx::ShaderType::Vertex)
+        if (shader.Type == ShaderType::Vertex)
         {
-            _shaderId = glCreateShader(GL_VERTEX_SHADER);
+            RenderId = glCreateShader(GL_VERTEX_SHADER);
         }
-        else if (shader.Type == Tbx::ShaderType::Fragment)
+        else if (shader.Type == ShaderType::Fragment)
         {
-            _shaderId = glCreateShader(GL_FRAGMENT_SHADER);
+            RenderId = glCreateShader(GL_FRAGMENT_SHADER);
         }
         else
         {
@@ -94,108 +87,65 @@ namespace OpenGLRendering
         // Send the shader source code to GL
         // Note that std::string's .c_str is NULL character terminated.
         const auto* source = shader.Source.c_str();
-        glShaderSource(_shaderId, 1, &source, nullptr);
+        glShaderSource(RenderId, 1, &source, nullptr);
 
         // Compile the vertex shader
-        glCompileShader(_shaderId);
+        glCompileShader(RenderId);
 
         GLint isCompiled = 0;
-        glGetShaderiv(_shaderId, GL_COMPILE_STATUS, &isCompiled);
+        glGetShaderiv(RenderId, GL_COMPILE_STATUS, &isCompiled);
         if (isCompiled == GL_FALSE) // Check if we failed compilation
         {
             // Get the error
             GLint maxLength = 0;
-            glGetShaderiv(_shaderId, GL_INFO_LOG_LENGTH, &maxLength);
+            glGetShaderiv(RenderId, GL_INFO_LOG_LENGTH, &maxLength);
             std::vector<GLchar> infoLog(maxLength);
-            glGetShaderInfoLog(_shaderId, maxLength, &maxLength, &infoLog[0]);
+            glGetShaderInfoLog(RenderId, maxLength, &maxLength, &infoLog[0]);
 
             // Cleanup
-            glDeleteShader(_shaderId);
+            glDeleteShader(RenderId);
 
             // Assert
             const auto& error = std::string(infoLog.data());
             TBX_ASSERT(false, "GL Rendering: Shader compilation failure: {}", error);
             return;
         }
-
-        // Attach our shader to our program
-        glAttachShader(_programId, _shaderId);
     }
 
-    void OpenGLShader::UploadUniform(const Tbx::ShaderUniform& data) const
+    ///// Shader //////////////////////////////////////////////////////////////////
+    OpenGLShader::~OpenGLShader()
     {
-        if (std::holds_alternative<Tbx::Mat4x4>(data.Data))
-        {
-            UploadUniformMat4(data.Name, std::get<Tbx::Mat4x4>(data.Data), _programId);
-        }
-        else if (std::holds_alternative<Tbx::Vector2>(data.Data))
-        {
-            UploadUniformFloat2(data.Name, std::get<Tbx::Vector2>(data.Data), _programId);
-        }
-        else if (std::holds_alternative<Tbx::Vector3>(data.Data))
-        {
-            UploadUniformFloat3(data.Name, std::get<Tbx::Vector3>(data.Data), _programId);
-        }
-        else if (std::holds_alternative<Tbx::RgbaColor>(data.Data))
-        {
-            UploadUniformFloat4(data.Name, std::get<Tbx::RgbaColor>(data.Data), _programId);
-        }
-        else if (std::holds_alternative<float>(data.Data))
-        {
-            UploadUniformFloat(data.Name, std::get<float>(data.Data), _programId);
-        }
-        else if (std::holds_alternative<int>(data.Data))
-        {
-            UploadUniformInt(data.Name, std::get<int>(data.Data), _programId);
-        }
-        else
-        {
-            TBX_ASSERT(false, "GL Rendering: Unsupported shader data type.");
-        }
+        glDeleteShader(RenderId);
     }
 
-    void OpenGLShader::Detach() const
+    ///// ShaderProgram //////////////////////////////////////////////////////////////////
+
+    OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<Ref<ShaderResource>>& shaders)
     {
-        glDetachShader(_programId, _shaderId);
-    }
-
-    ///// Material //////////////////////////////////////////////////////////////////
-
-    OpenGLMaterial::~OpenGLMaterial()
-    {
-        glUseProgram(0);
-        glDeleteProgram(_materialGLId);
-    }
-
-    void OpenGLMaterial::Upload(const Tbx::Material& material)
-    {
-        _materialGLId = glCreateProgram();
-
+        RenderId = glCreateProgram();
         {
             // Compile shaders
-            for (const auto& shader : material.Shaders)
+            for (const auto& shader : shaders)
             {
-                auto& glShader = _shaders.emplace_back();
-                glShader.Attach(*shader, _materialGLId);
+                glAttachShader(RenderId, shader->RenderId);
             }
 
             // Link our program
-            glLinkProgram(_materialGLId);
+            glLinkProgram(RenderId);
 
             // Note the different functions here: glGetProgram* instead of glGetShader*.
             GLint isLinked = 0;
-            glGetProgramiv(_materialGLId, GL_LINK_STATUS, &isLinked);
+            glGetProgramiv(RenderId, GL_LINK_STATUS, &isLinked);
             if (isLinked == GL_FALSE) // Check if we failed linking
             {
                 // Get the error
                 GLint maxLength = 0;
-                glGetProgramiv(_materialGLId, GL_INFO_LOG_LENGTH, &maxLength);
+                glGetProgramiv(RenderId, GL_INFO_LOG_LENGTH, &maxLength);
                 std::vector<GLchar> infoLog(maxLength);
-                glGetProgramInfoLog(_materialGLId, maxLength, &maxLength, &infoLog[0]);
+                glGetProgramInfoLog(RenderId, maxLength, &maxLength, &infoLog[0]);
 
                 // Cleanup
-                glDeleteProgram(_materialGLId);
-                _shaders.clear();
+                glDeleteProgram(RenderId);
 
                 // Assert
                 const auto& error = std::string(infoLog.data());
@@ -204,67 +154,57 @@ namespace OpenGLRendering
             }
 
             // Detach after successful link
-            for (const auto& shader : _shaders)
+            for (const auto& shader : shaders)
             {
-                shader.Detach();
+                glDetachShader(RenderId, shader->RenderId);
             }
         }
     }
 
-    void OpenGLMaterial::Bind() const
+    OpenGLShaderProgram::~OpenGLShaderProgram()
     {
-        glUseProgram(_materialGLId);
+        glDeleteProgram(RenderId);
     }
 
-    void OpenGLMaterial::Unbind() const
+    void OpenGLRendering::OpenGLShaderProgram::Activate()
+    {
+        glUseProgram(RenderId);
+    }
+
+    void OpenGLRendering::OpenGLShaderProgram::Release()
     {
         glUseProgram(0);
     }
 
-    void OpenGLMaterial::UploadUniform(const Tbx::ShaderUniform& data) const
+    void OpenGLRendering::OpenGLShaderProgram::Upload(const ShaderUniform& uniform)
     {
-        for (const auto& shader : _shaders)
+        if (std::holds_alternative<Mat4x4>(uniform.Data))
         {
-            shader.UploadUniform(data);
+            UploadUniformMat4(uniform.Name, std::get<Mat4x4>(uniform.Data), RenderId);
         }
-    }
-
-    ///// Material Instance //////////////////////////////////////////////////////////////////
-
-    void OpenGLMaterialInstance::Upload(const Tbx::MaterialInstance& material)
-    {
-        _material.Bind();
-        Tbx::uint slot = 0;
-        for (const auto& texture : material.Textures)
+        else if (std::holds_alternative<Vector2>(uniform.Data))
         {
-            auto& glTexture = _textures.emplace_back();
-            glTexture.Upload(*texture, slot);
-            slot++;
+            UploadUniformFloat2(uniform.Name, std::get<Vector2>(uniform.Data), RenderId);
         }
-        _material.Unbind();
-    }
-
-    void OpenGLMaterialInstance::Bind() const
-    {
-        _material.Bind();
-        for (const auto& tex : _textures)
+        else if (std::holds_alternative<Vector3>(uniform.Data))
         {
-            tex.Bind();
+            UploadUniformFloat3(uniform.Name, std::get<Vector3>(uniform.Data), RenderId);
         }
-    }
-
-    void OpenGLMaterialInstance::Unbind() const
-    {
-        _material.Unbind();
-        for (const auto& tex : _textures)
+        else if (std::holds_alternative<RgbaColor>(uniform.Data))
         {
-            tex.Unbind();
+            UploadUniformFloat4(uniform.Name, std::get<RgbaColor>(uniform.Data), RenderId);
         }
-    }
-
-    void OpenGLMaterialInstance::SetUniform(const Tbx::ShaderUniform& data) const
-    {
-        _material.Bind();
-        _material.UploadUniform(data);
+        else if (std::holds_alternative<float>(uniform.Data))
+        {
+            UploadUniformFloat(uniform.Name, std::get<float>(uniform.Data), RenderId);
+        }
+        else if (std::holds_alternative<int>(uniform.Data))
+        {
+            UploadUniformInt(uniform.Name, std::get<int>(uniform.Data), RenderId);
+        }
+        else
+        {
+            TBX_ASSERT(false, "GL Rendering: Unsupported shader data type.");
+        }
     }
 }

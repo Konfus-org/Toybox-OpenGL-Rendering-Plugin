@@ -1,30 +1,25 @@
 #pragma once
-#include "IBindable.h"
 #include "OpenGLBuffers.h"
 #include <Tbx/Graphics/Vertex.h>
-#include <Tbx/Math/Int.h>
+#include <Tbx/Graphics/GraphicsResource.h>
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
-    class OpenGLMesh final : public IBindable
+    class OpenGLMesh final : public MeshResource
     {
     public:
-        OpenGLMesh();
+        OpenGLMesh(const Mesh& mesh);
         ~OpenGLMesh() override;
 
-        void Bind() const override;
-        void Unbind() const override;
+        void Activate() override;
+        void Release() override;
 
-        void UploadVertexBuffer(const Tbx::VertexBuffer& buffer);
-        void UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer);
-
-        const OpenGLVertexBuffer& GetVertexBuffer() const { return _vertexBuffer; }
-        const OpenGLIndexBuffer& GetIndexBuffer() const { return _indexBuffer; }
+        void SetVertexBuffer(const VertexBuffer& buffer) override;
+        void SetIndexBuffer(const IndexBuffer& buffer) override;
 
     private:
         OpenGLVertexBuffer _vertexBuffer;
         OpenGLIndexBuffer _indexBuffer;
-        Tbx::uint32 _rendererId = -1;
     };
 }
 

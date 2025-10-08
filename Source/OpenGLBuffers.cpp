@@ -2,21 +2,21 @@
 #include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
     /// Helpers ///////////////////////////////////////////////////////////
 
-    static GLenum VertexTypeToGlType(const Tbx::VertexData& type)
+    static GLenum VertexTypeToGlType(const VertexData& type)
     {
-        if (std::holds_alternative<Tbx::Vector2>(type))
+        if (std::holds_alternative<Vector2>(type))
         {
             return GL_FLOAT;
         }
-        else if (std::holds_alternative<Tbx::Vector3>(type))
+        else if (std::holds_alternative<Vector3>(type))
         {
             return GL_FLOAT;
         }
-        else if (std::holds_alternative<Tbx::RgbaColor>(type))
+        else if (std::holds_alternative<RgbaColor>(type))
         {
             return GL_FLOAT;
         }
@@ -49,13 +49,13 @@ namespace OpenGLRendering
         glDeleteBuffers(1, &_vertBufferGLId);
     }
 
-    void OpenGLVertexBuffer::Upload(const Tbx::VertexBuffer& buffer)
+    void OpenGLVertexBuffer::Upload(const VertexBuffer& buffer)
     {
         const auto& verticesVec = buffer.Vertices;
-        _count = (Tbx::uint32)verticesVec.size();
+        _count = (uint32)verticesVec.size();
         glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), verticesVec.data(), GL_STATIC_DRAW);
 
-        Tbx::uint32 index = 0;
+        uint32 index = 0;
         const auto& layout = buffer.Layout;
         const auto& stride = layout.Stride;
         for (const auto& element : layout.Elements)
@@ -69,7 +69,7 @@ namespace OpenGLRendering
         }
     }
 
-    void OpenGLVertexBuffer::AddAttribute(Tbx::uint index, Tbx::uint32 size, Tbx::uint32 type, Tbx::uint32 stride, Tbx::uint32 offset, bool normalized) const
+    void OpenGLVertexBuffer::AddAttribute(uint index, uint32 size, uint32 type, uint32 stride, uint32 offset, bool normalized) const
     {
         // Need to do this casting nonsense to get rid of a warning...
         const auto* offsetPtr = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(offset));
@@ -94,10 +94,10 @@ namespace OpenGLRendering
         glCreateBuffers(1, &_indexBuffGLId);
     }
 
-    void OpenGLIndexBuffer::Upload(const Tbx::IndexBuffer& buffer)
+    void OpenGLIndexBuffer::Upload(const IndexBuffer& buffer)
     {
-        _count = (Tbx::uint32)buffer.size();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(Tbx::uint32), buffer.data(), GL_STATIC_DRAW);
+        _count = (uint32)buffer.size();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(uint32), buffer.data(), GL_STATIC_DRAW);
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()

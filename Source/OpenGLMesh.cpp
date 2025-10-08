@@ -1,41 +1,45 @@
 #include "OpenGLMesh.h"
 #include "OpenGLBuffers.h"
-#include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
-    OpenGLMesh::OpenGLMesh()
+    OpenGLRendering::OpenGLMesh::OpenGLMesh(const Mesh& mesh)
     {
-        glGenVertexArrays(1, &_rendererId);
+        auto id = static_cast<uint32>(RenderId);
+        glGenVertexArrays(1, &id);
+
+        SetVertexBuffer(mesh.Vertices);
+        SetIndexBuffer(mesh.Indices);
     }
 
     OpenGLMesh::~OpenGLMesh()
     {
-        glDeleteVertexArrays(1, &_rendererId);
+        auto id = static_cast<uint32>(RenderId);
+        glDeleteVertexArrays(1, &id);
     }
 
-    void OpenGLMesh::UploadVertexBuffer(const Tbx::VertexBuffer& buffer)
+    void OpenGLMesh::SetVertexBuffer(const VertexBuffer& buffer)
     {
         TBX_ASSERT(buffer.Layout.Elements.size(), "GL Rendering: Vertex buffer has no layout... a layout MUST be provided!");
         _vertexBuffer.Bind();
         _vertexBuffer.Upload(buffer);
     }
 
-    void OpenGLMesh::UploadIndexBuffer(const std::vector<Tbx::uint32>& buffer)
+    void OpenGLMesh::SetIndexBuffer(const IndexBuffer& buffer)
     {
         _indexBuffer.Bind();
         _indexBuffer.Upload(buffer);
     }
 
-    void OpenGLMesh::Bind() const
+    void OpenGLMesh::Activate()
     {
         _vertexBuffer.Bind();
         _indexBuffer.Bind();
-        glBindVertexArray(_rendererId);
+        glBindVertexArray(RenderId);
     }
 
-    void OpenGLMesh::Unbind() const
+    void OpenGLMesh::Release()
     {
         _vertexBuffer.Unbind();
         _indexBuffer.Unbind();

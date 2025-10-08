@@ -1,23 +1,23 @@
 #pragma once
-#include "IBindable.h"
+#include <Tbx/Graphics/GraphicsResource.h>
 #include <Tbx/Graphics/Texture.h>
 
-namespace OpenGLRendering
+namespace Tbx::Plugins::OpenGLRendering
 {
-    class OpenGLTexture final : public IBindable
+    class OpenGLTexture final : public TextureResource
     {
     public:
-        OpenGLTexture();
+        OpenGLTexture(const Texture& tex);
         ~OpenGLTexture() override;
 
-        void Bind() const override;
-        void Unbind() const override;
+        void SetSlot(uint32 slot) override;
 
-        void Upload(const Tbx::Texture& tex, const Tbx::uint& slot);
+        void Activate() override;
+        void Release() override;
 
     private:
-        Tbx::uint _slot = 0;
-        Tbx::uint32 _textureGLId = -1;
+        uint _slot = 0;
+        uint32 _glId = -1;
     };
 }
 
