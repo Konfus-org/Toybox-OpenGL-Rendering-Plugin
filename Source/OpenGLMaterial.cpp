@@ -1,11 +1,10 @@
-#include "OpenGLMaterial.h"
+#include "OpenGLShader.h"
 #include <Tbx/Math/Vectors.h>
 #include <Tbx/Math/Mat4x4.h>
 #include <Tbx/Graphics/Color.h>
 #include <Tbx/Debug/Asserts.h>
 #include <glad/glad.h>
 #include <vector>
-#include "OpenGLShader.h"
 
 namespace Tbx::Plugins::OpenGLRendering
 {
