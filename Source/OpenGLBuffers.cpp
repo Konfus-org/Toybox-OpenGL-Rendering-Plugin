@@ -72,9 +72,8 @@ namespace Tbx::Plugins::OpenGLRendering
     void OpenGLVertexBuffer::AddAttribute(uint index, uint32 size, uint32 type, uint32 stride, uint32 offset, bool normalized) const
     {
         // Need to do this casting nonsense to get rid of a warning...
-        const auto* offsetPtr = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(offset));
         glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, size, type, normalized, stride, offsetPtr);
+        glVertexAttribPointer(index, size, type, normalized, stride, &offset);
     }
 
     void OpenGLVertexBuffer::Bind() const

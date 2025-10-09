@@ -17,7 +17,6 @@ namespace Tbx::Plugins::OpenGLRendering
 
     private:
         uint _slot = 0;
-        uint32 _glId = -1;
     };
 }
 

@@ -72,20 +72,21 @@ namespace Tbx::Plugins::OpenGLRendering
 
     OpenGLTexture::OpenGLTexture(const Texture& tex)
     {
-        glCreateTextures(GL_TEXTURE_2D, 1, &_glId);
-
         // Generate texture
-        glGenTextures(1, &_glId);
-        glBindTexture(GL_TEXTURE_2D, _glId);
+        auto id = static_cast<uint32>(RenderId);
+        glCreateTextures(GL_TEXTURE_2D, 1, &id);
+        glGenTextures(1, &id);
+        glBindTexture(GL_TEXTURE_2D, id);
+        RenderId = id;
 
         // Convert tbx texture to OpenGL texture
         GlTextureFormat format = TbxTexFormatToGLTexFormat(tex);
         auto filtering = TbxTexFilterToGLTexFilter(tex);
         auto wrapping = TbxTexWrapToGLTexWrap(tex);
-        glTextureParameteri(_glId, GL_TEXTURE_MIN_FILTER, filtering);
-        glTextureParameteri(_glId, GL_TEXTURE_MAG_FILTER, filtering);
-        glTextureParameteri(_glId, GL_TEXTURE_WRAP_S, wrapping);
-        glTextureParameteri(_glId, GL_TEXTURE_WRAP_T, wrapping);
+        glTextureParameteri(RenderId, GL_TEXTURE_MIN_FILTER, filtering);
+        glTextureParameteri(RenderId, GL_TEXTURE_MAG_FILTER, filtering);
+        glTextureParameteri(RenderId, GL_TEXTURE_WRAP_S, wrapping);
+        glTextureParameteri(RenderId, GL_TEXTURE_WRAP_T, wrapping);
 
         // Upload texture data to GPU
         glTexImage2D(GL_TEXTURE_2D, 0, format.InternalFormat, tex.Resolution.Width, tex.Resolution.Height, 0, format.DataFormat, GL_UNSIGNED_BYTE, tex.Pixels.data());
@@ -94,7 +95,8 @@ namespace Tbx::Plugins::OpenGLRendering
 
     OpenGLTexture::~OpenGLTexture()
     {
-        glDeleteTextures(1, &_glId);
+        auto id = static_cast<uint32>(RenderId);
+        glDeleteTextures(1, &id);
     }
 
     void OpenGLTexture::SetSlot(uint32 slot)
@@ -104,7 +106,7 @@ namespace Tbx::Plugins::OpenGLRendering
 
     void OpenGLTexture::Activate()
     {
-        glBindTextureUnit(_slot, _glId);
+        glBindTextureUnit(_slot, RenderId);
     }
 
     void OpenGLTexture::Release()

@@ -121,42 +121,40 @@ namespace Tbx::Plugins::OpenGLRendering
 
     OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<Ref<ShaderResource>>& shaders)
     {
+        // Create program
         RenderId = glCreateProgram();
+
+        // Attach shaders
+        for (const auto& shader : shaders)
         {
-            // Compile shaders
-            for (const auto& shader : shaders)
-            {
-                glAttachShader(RenderId, shader->RenderId);
-            }
+            glAttachShader(RenderId, shader->RenderId);
+        }
 
-            // Link our program
-            glLinkProgram(RenderId);
+        // Link our program
+        glLinkProgram(RenderId);
+        GLint isLinked = 0;
+        glGetProgramiv(RenderId, GL_LINK_STATUS, &isLinked);
+        if (isLinked == GL_FALSE) // Check if we failed linking
+        {
+            // Get the error
+            GLint maxLength = 0;
+            glGetProgramiv(RenderId, GL_INFO_LOG_LENGTH, &maxLength);
+            std::vector<GLchar> infoLog(maxLength);
+            glGetProgramInfoLog(RenderId, maxLength, &maxLength, &infoLog[0]);
 
-            // Note the different functions here: glGetProgram* instead of glGetShader*.
-            GLint isLinked = 0;
-            glGetProgramiv(RenderId, GL_LINK_STATUS, &isLinked);
-            if (isLinked == GL_FALSE) // Check if we failed linking
-            {
-                // Get the error
-                GLint maxLength = 0;
-                glGetProgramiv(RenderId, GL_INFO_LOG_LENGTH, &maxLength);
-                std::vector<GLchar> infoLog(maxLength);
-                glGetProgramInfoLog(RenderId, maxLength, &maxLength, &infoLog[0]);
+            // Cleanup
+            glDeleteProgram(RenderId);
 
-                // Cleanup
-                glDeleteProgram(RenderId);
+            // Assert
+            const auto& error = std::string(infoLog.data());
+            TBX_ASSERT(false, "GL Rendering: Shader link failure: {0}", error);
+            return;
+        }
 
-                // Assert
-                const auto& error = std::string(infoLog.data());
-                TBX_ASSERT(false, "GL Rendering: Shader link failure: {0}", error);
-                return;
-            }
-
-            // Detach after successful link
-            for (const auto& shader : shaders)
-            {
-                glDetachShader(RenderId, shader->RenderId);
-            }
+        // Detach after successful link
+        for (const auto& shader : shaders)
+        {
+            glDetachShader(RenderId, shader->RenderId);
         }
     }
 
