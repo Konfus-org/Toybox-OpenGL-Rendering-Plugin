@@ -1,6 +1,7 @@
 #include "OpenGLBuffers.h"
 #include <Tbx/Debug/Tracers.h>
 #include <glad/glad.h>
+#include <cstdint>
 
 namespace Tbx::Plugins::OpenGLRendering
 {
@@ -63,7 +64,7 @@ namespace Tbx::Plugins::OpenGLRendering
             const auto& type = VertexTypeToGlType(element.Type);
             const auto& size = element.Count;
             const auto& offset = element.Offset;
-            const auto& normalized = element.Normalized ? GL_TRUE : GL_FALSE;
+            const bool normalized = element.Normalized;
             AddAttribute(index, size, type, stride, offset, normalized);
             index++;
         }
@@ -73,7 +74,15 @@ namespace Tbx::Plugins::OpenGLRendering
     {
         // Need to do this casting nonsense to get rid of a warning...
         glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, size, type, normalized, stride, &offset);
+        const void* attributeOffset = reinterpret_cast<const void*>(static_cast<uintptr_t>(offset));
+        if (type == GL_INT && !normalized)
+        {
+            glVertexAttribIPointer(index, size, type, stride, attributeOffset);
+        }
+        else
+        {
+            glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, attributeOffset);
+        }
     }
 
     void OpenGLVertexBuffer::Bind() const
