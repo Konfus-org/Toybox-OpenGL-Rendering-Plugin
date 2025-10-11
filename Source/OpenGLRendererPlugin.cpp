@@ -61,6 +61,7 @@ namespace Tbx::Plugins::OpenGLRendering
 
     void OpenGLRenderingPlugin::EndDraw()
     {
+        glFlush();
     }
 
     Ref<TextureResource> OpenGLRenderingPlugin::UploadTexture(const Texture& texture)
