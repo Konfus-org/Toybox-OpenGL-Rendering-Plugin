@@ -31,6 +31,9 @@ namespace Tbx::Plugins::OpenGLRendering
     private:
         Ref<IGraphicsContext> _context = nullptr;
         bool _isGlInitialized = false;
+
+        // Inherited via IGraphicsBackend
+        void EnableDepthTesting(bool enabled) override;
     };
 
     TBX_REGISTER_PLUGIN(OpenGLRenderingPlugin);
