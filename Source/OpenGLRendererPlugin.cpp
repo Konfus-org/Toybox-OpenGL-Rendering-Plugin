@@ -29,14 +29,15 @@ namespace Tbx::Plugins::OpenGLRendering
         }
     }
 
-    void OpenGLRenderingPlugin::DeleteResource(GraphicsResource* resourceToDelete)
-    {
-        delete resourceToDelete;
-    }
-
     GraphicsApi OpenGLRenderingPlugin::GetApi() const
     {
         return GraphicsApi::OpenGL;
+    }
+
+    void OpenGLRenderingPlugin::EnableDepthTesting(bool enabled)
+    {
+        if (enabled) glDepthMask(GL_TRUE);
+        else glDepthMask(GL_FALSE);
     }
 
     void OpenGLRenderingPlugin::SetContext(Ref<IGraphicsContext> context)
@@ -50,8 +51,11 @@ namespace Tbx::Plugins::OpenGLRendering
 
     void OpenGLRenderingPlugin::BeginDraw(const RgbaColor& clearColor, const Viewport& viewport)
     {
-        glClearColor(clearColor.R, clearColor.G, clearColor.B, clearColor.A);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glClearDepth(1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(clearColor.R, clearColor.G, clearColor.B, clearColor.A);
         glViewport((GLint)viewport.Position.X, (GLint)viewport.Position.Y, viewport.Extends.Width, viewport.Extends.Height);
     }
 
@@ -118,5 +122,10 @@ namespace Tbx::Plugins::OpenGLRendering
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         _isGlInitialized = true;
+    }
+
+    void OpenGLRenderingPlugin::DeleteResource(GraphicsResource* resourceToDelete)
+    {
+        delete resourceToDelete;
     }
 }
