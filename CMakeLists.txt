@@ -1,4 +1,4 @@
-set(LibName OpenGlRendering)
+set(LibName OpenGLRendering)
 add_library(${LibName} SHARED)
 
 # Sources
