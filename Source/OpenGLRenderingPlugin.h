@@ -25,11 +25,10 @@ namespace Tbx::Plugins::OpenGLRendering
         Ref<ShaderResource> CompileShader(const Shader& shader) override;
 
     private:
-        void InitializeOpenGl(Ref<IGraphicsContext> context);
+        void InitializeOpenGl();
         void DeleteResource(GraphicsResource* resourceToDelete);
 
     private:
-        Ref<IGraphicsContext> _context = nullptr;
         bool _isGlInitialized = false;
 
         // Inherited via IGraphicsBackend

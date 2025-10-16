@@ -44,9 +44,8 @@ namespace Tbx::Plugins::OpenGLRendering
     {
         if (!_isGlInitialized)
         {
-            InitializeOpenGl(context);
+            InitializeOpenGl();
         }
-        _context = context;
     }
 
     void OpenGLRenderingPlugin::BeginDraw(const RgbaColor& clearColor, const Viewport& viewport)
@@ -84,7 +83,7 @@ namespace Tbx::Plugins::OpenGLRendering
         return Ref<OpenGLShader>(new OpenGLShader(shader), [this](OpenGLShader* resource) { DeleteResource(resource); });
     }
 
-    void OpenGLRenderingPlugin::InitializeOpenGl(Ref<IGraphicsContext> context)
+    void OpenGLRenderingPlugin::InitializeOpenGl()
     {
         TBX_TRACE_INFO("GL Rendering: Initializing OpenGl...\n");
 
