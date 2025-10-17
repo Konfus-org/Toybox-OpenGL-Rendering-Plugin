@@ -14,6 +14,7 @@ namespace Tbx::Plugins::OpenGLRendering
 
         GraphicsApi GetApi() const override;
 
+        void EnableDepthTesting(bool enabled) override;
         void SetContext(Ref<IGraphicsContext> context) override;
         void BeginDraw(const RgbaColor& clearColor, const Viewport& viewport) override;
         void EndDraw() override;
@@ -30,9 +31,6 @@ namespace Tbx::Plugins::OpenGLRendering
 
     private:
         bool _isGlInitialized = false;
-
-        // Inherited via IGraphicsBackend
-        void EnableDepthTesting(bool enabled) override;
     };
 
     TBX_REGISTER_PLUGIN(OpenGLRenderingPlugin);
